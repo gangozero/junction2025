@@ -85,19 +85,19 @@
 
 ### Implementation for US4
 
-- [ ] T023 [P] [US4] Create UserAccount entity model in lib/features/auth/domain/entities/user_account.dart
-- [ ] T024 [P] [US4] Create APISession entity model in lib/features/auth/domain/entities/api_session.dart
-- [ ] T025 [P] [US4] Create auth DTOs in lib/features/auth/data/models/ (login_request.dart, token_response.dart, refresh_request.dart)
-- [ ] T026 [US4] Create auth repository interface in lib/features/auth/domain/repositories/auth_repository.dart
-- [ ] T027 [US4] Implement auth API data source in lib/features/auth/data/datasources/auth_remote_datasource.dart (POST /auth/token, /auth/refresh, /auth/revoke)
-- [ ] T028 [US4] Implement auth repository in lib/features/auth/data/repositories/auth_repository_impl.dart with token refresh logic
-- [ ] T029 [US4] Create auth state notifier in lib/features/auth/presentation/providers/auth_provider.dart using Riverpod StateNotifier
-- [ ] T030 [US4] Create login screen UI in lib/features/auth/presentation/screens/login_screen.dart with responsive layout
-- [ ] T031 [US4] Create login form widgets in lib/features/auth/presentation/widgets/ (email_field.dart, password_field.dart, login_button.dart)
-- [ ] T032 [US4] Implement automatic token refresh interceptor in lib/services/api/rest/auth_interceptor.dart
-- [ ] T033 [US4] Implement secure token storage (mobile: keychain/keystore, web: encrypted IndexedDB) in lib/features/auth/data/datasources/auth_local_datasource.dart
-- [ ] T034 [US4] Add logout functionality with token revocation and local data cleanup
-- [ ] T035 [US4] Create auth error handling and user-friendly error messages
+- [x] T023 [P] [US4] Create UserAccount entity model in lib/features/auth/domain/entities/user_account.dart
+- [x] T024 [P] [US4] Create APISession entity model in lib/features/auth/domain/entities/api_session.dart
+- [x] T025 [P] [US4] Create auth DTOs in lib/features/auth/data/models/ (login_request.dart, token_response.dart, refresh_request.dart)
+- [x] T026 [US4] Create auth repository interface in lib/features/auth/domain/repositories/auth_repository.dart
+- [x] T027 [US4] Implement auth API data source in lib/features/auth/data/datasources/auth_remote_datasource.dart (POST /auth/token, /auth/refresh, /auth/revoke)
+- [x] T028 [US4] Implement auth repository in lib/features/auth/data/repositories/auth_repository_impl.dart with token refresh logic
+- [x] T029 [US4] Create auth state notifier in lib/features/auth/presentation/providers/auth_provider.dart using Riverpod StateNotifier
+- [x] T030 [US4] Create login screen UI in lib/features/auth/presentation/screens/login_screen.dart with responsive layout
+- [x] T031 [US4] Create login form widgets in lib/features/auth/presentation/widgets/ (email_field.dart, password_field.dart, login_button.dart)
+- [x] T032 [US4] Implement automatic token refresh interceptor in lib/services/api/rest/auth_interceptor.dart
+- [x] T033 [US4] Implement secure token storage (mobile: keychain/keystore, web: encrypted IndexedDB) in lib/features/auth/data/datasources/auth_local_datasource.dart
+- [x] T034 [US4] Add logout functionality with token revocation and local data cleanup
+- [x] T035 [US4] Create auth error handling and user-friendly error messages
 
 **Checkpoint**: ✅ Authentication complete - users can securely log in/out across all platforms
 
