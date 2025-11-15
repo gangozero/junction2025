@@ -163,6 +163,7 @@ class DeviceLocalDataSource {
     return {
       'deviceId': device.deviceId,
       'name': device.name,
+      'deviceType': device.deviceType.name,
       'modelNumber': device.modelNumber,
       'serialNumber': device.serialNumber,
       'powerState': device.powerState.name,
@@ -184,6 +185,10 @@ class DeviceLocalDataSource {
     return SaunaController(
       deviceId: map['deviceId'] as String,
       name: map['name'] as String,
+      deviceType: DeviceType.values.firstWhere(
+        (e) => e.name == map['deviceType'],
+        orElse: () => DeviceType.unknown,
+      ),
       modelNumber: map['modelNumber'] as String,
       serialNumber: map['serialNumber'] as String,
       powerState: PowerState.values.firstWhere(

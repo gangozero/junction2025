@@ -56,14 +56,18 @@ class DeviceDto {
       }
     }
 
+    // Extract device type from JSON (name field in API response is actually the device ID)
+    final deviceType = json['type'] as String?;
+
     return DeviceDto(
-      id: json['id'] as String,
-      name: attrs['name'] ?? '',
-      modelNumber: attrs['modelNumber'] ?? attrs['model'] ?? '',
+      id: json['name'] as String? ?? json['id'] as String,
+      name: attrs['name'] ?? attrs['serialNumber'] ?? '',
+      modelNumber: deviceType ?? attrs['modelNumber'] ?? attrs['model'] ?? '',
       serialNumber: attrs['serialNumber'] ?? attrs['serial'] ?? '',
       powerState: attrs['powerState'] ?? 'unknown',
       heatingStatus: attrs['heatingStatus'] ?? 'unknown',
-      connectionStatus: attrs['connectionStatus'] ?? 'unknown',
+      connectionStatus:
+          attrs['connectionStatus'] ?? attrs['connected'] ?? 'unknown',
       currentTemperature: double.tryParse(attrs['currentTemperature'] ?? ''),
       targetTemperature: double.tryParse(attrs['targetTemperature'] ?? ''),
       minTemperature: double.tryParse(attrs['minTemperature'] ?? ''),
@@ -101,6 +105,7 @@ class DeviceDto {
     return SaunaController(
       deviceId: id,
       name: name,
+      deviceType: _parseDeviceType(modelNumber),
       modelNumber: modelNumber,
       serialNumber: serialNumber,
       powerState: _parsePowerState(powerState),
@@ -115,6 +120,18 @@ class DeviceDto {
       lastUpdated: lastUpdated != null ? DateTime.parse(lastUpdated!) : null,
       linkedSensorIds: linkedSensorIds ?? [],
     );
+  }
+
+  /// Parse device type from string
+  static DeviceType _parseDeviceType(String value) {
+    switch (value.toUpperCase()) {
+      case 'FENIX':
+        return DeviceType.fenix;
+      case 'SAUNASENSOR':
+        return DeviceType.saunaSensor;
+      default:
+        return DeviceType.unknown;
+    }
   }
 
   /// Parse power state from string

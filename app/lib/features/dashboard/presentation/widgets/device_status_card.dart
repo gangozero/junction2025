@@ -24,71 +24,292 @@ class DeviceStatusCard extends ConsumerWidget {
     final deviceStateAsync = ref.watch(deviceStateProvider(deviceId));
 
     return deviceStateAsync.when(
-      data: (device) => Card(
-        elevation: LayoutConstants.cardElevation,
-        child: InkWell(
-          onTap: () {
-            // TODO: Navigate to device details screen
-          },
-          borderRadius: BorderRadius.circular(LayoutConstants.cardBorderRadius),
-          child: Padding(
-            padding: const EdgeInsets.all(LayoutConstants.spacingMedium),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header: Device name and connection status
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        device.name,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+      data: (device) {
+        // Different card designs based on device type
+        if (device.deviceType == DeviceType.saunaSensor) {
+          return _SensorCard(device: device);
+        } else {
+          return _ControllerCard(device: device);
+        }
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('Error: $err')),
+    );
+  }
+}
+
+/// Controller card for Fenix devices
+class _ControllerCard extends StatelessWidget {
+  final SaunaController device;
+
+  const _ControllerCard({required this.device});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: LayoutConstants.cardElevation,
+      color: Colors.deepOrange.shade50,
+      child: InkWell(
+        onTap: () {
+          // TODO: Navigate to device details screen
+        },
+        borderRadius: BorderRadius.circular(LayoutConstants.cardBorderRadius),
+        child: Padding(
+          padding: const EdgeInsets.all(LayoutConstants.spacingMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with controller icon
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.deepOrange,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.settings_remote,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                device.name.isNotEmpty
+                                    ? device.name
+                                    : device.serialNumber,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                'Controller',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Colors.deepOrange,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    _ConnectionStatusIndicator(status: device.connectionStatus),
-                  ],
-                ),
-                const SizedBox(height: LayoutConstants.spacingSmall),
-
-                // Model number
-                Text(
-                  device.modelNumber,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
-                ),
-                const SizedBox(height: LayoutConstants.spacingMedium),
-
-                // Temperature display
-                if (device.hasTemperature)
-                  TemperatureDisplay(device: device)
-                else
-                  _NoTemperatureDisplay(
-                    heatingStatus: device.heatingStatus,
-                    connectionStatus: device.connectionStatus,
-                    powerState: device.powerState,
                   ),
-                const SizedBox(height: LayoutConstants.spacingMedium),
+                  _ConnectionStatusIndicator(status: device.connectionStatus),
+                ],
+              ),
+              const SizedBox(height: LayoutConstants.spacingMedium),
 
-                // Heating status and power state
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    HeatingStatusWidget(status: device.heatingStatus),
-                    _PowerStateIndicator(state: device.powerState),
-                  ],
+              // Temperature display
+              if (device.hasTemperature)
+                TemperatureDisplay(device: device)
+              else
+                _NoTemperatureDisplay(
+                  heatingStatus: device.heatingStatus,
+                  connectionStatus: device.connectionStatus,
+                  powerState: device.powerState,
                 ),
-              ],
-            ),
+              const SizedBox(height: LayoutConstants.spacingMedium),
+
+              // Heating status and power state
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  HeatingStatusWidget(status: device.heatingStatus),
+                  _PowerStateIndicator(state: device.powerState),
+                ],
+              ),
+            ],
           ),
         ),
       ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('Error: $err')),
+    );
+  }
+}
+
+/// Sensor card for SaunaSensor devices
+class _SensorCard extends StatelessWidget {
+  final SaunaController device;
+
+  const _SensorCard({required this.device});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: LayoutConstants.cardElevation,
+      color: Colors.blue.shade50,
+      child: InkWell(
+        onTap: () {
+          // TODO: Navigate to device details screen
+        },
+        borderRadius: BorderRadius.circular(LayoutConstants.cardBorderRadius),
+        child: Padding(
+          padding: const EdgeInsets.all(LayoutConstants.spacingMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with sensor icon
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.sensors,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                device.serialNumber,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                'Sensor',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _ConnectionStatusIndicator(status: device.connectionStatus),
+                ],
+              ),
+              const SizedBox(height: LayoutConstants.spacingMedium),
+
+              // Sensor readings in a compact row
+              if (device.hasTemperature || device.hasHumidity)
+                Row(
+                  children: [
+                    if (device.hasTemperature) ...[
+                      Expanded(
+                        child: _SensorReading(
+                          icon: Icons.thermostat,
+                          label: 'Temperature',
+                          value:
+                              '${device.currentTemperature!.toStringAsFixed(1)}°C',
+                          color: _getTemperatureColor(
+                            device.currentTemperature!,
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (device.hasTemperature && device.hasHumidity)
+                      const SizedBox(width: 12),
+                    if (device.hasHumidity) ...[
+                      Expanded(
+                        child: _SensorReading(
+                          icon: Icons.water_drop,
+                          label: 'Humidity',
+                          value:
+                              '${device.currentHumidity!.toStringAsFixed(1)}%',
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ],
+                )
+              else
+                _NoTemperatureDisplay(
+                  heatingStatus: device.heatingStatus,
+                  connectionStatus: device.connectionStatus,
+                  powerState: device.powerState,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getTemperatureColor(double temp) {
+    if (temp < 40) return Colors.blue;
+    if (temp < 60) return Colors.orange;
+    if (temp < 80) return Colors.deepOrange;
+    return Colors.red;
+  }
+}
+
+/// Sensor reading widget
+class _SensorReading extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  const _SensorReading({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

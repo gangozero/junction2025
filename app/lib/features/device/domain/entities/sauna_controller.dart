@@ -3,6 +3,16 @@ library;
 
 import 'package:equatable/equatable.dart';
 
+/// Device type
+enum DeviceType {
+  fenix, // Fenix controller - full control capabilities
+  saunaSensor, // SaunaSensor - simple sensor device
+  unknown;
+
+  bool get isController => this == DeviceType.fenix;
+  bool get isSensor => this == DeviceType.saunaSensor;
+}
+
 /// Power state of the sauna
 enum PowerState {
   off,
@@ -42,6 +52,7 @@ enum ConnectionStatus {
 class SaunaController extends Equatable {
   final String deviceId;
   final String name;
+  final DeviceType deviceType;
   final String modelNumber;
   final String serialNumber;
   final PowerState powerState;
@@ -59,6 +70,7 @@ class SaunaController extends Equatable {
   const SaunaController({
     required this.deviceId,
     required this.name,
+    this.deviceType = DeviceType.unknown,
     required this.modelNumber,
     required this.serialNumber,
     required this.powerState,
@@ -78,6 +90,7 @@ class SaunaController extends Equatable {
   List<Object?> get props => [
     deviceId,
     name,
+    deviceType,
     modelNumber,
     serialNumber,
     powerState,
@@ -137,6 +150,7 @@ class SaunaController extends Equatable {
   SaunaController copyWith({
     String? deviceId,
     String? name,
+    DeviceType? deviceType,
     String? modelNumber,
     String? serialNumber,
     PowerState? powerState,
@@ -154,6 +168,7 @@ class SaunaController extends Equatable {
     return SaunaController(
       deviceId: deviceId ?? this.deviceId,
       name: name ?? this.name,
+      deviceType: deviceType ?? this.deviceType,
       modelNumber: modelNumber ?? this.modelNumber,
       serialNumber: serialNumber ?? this.serialNumber,
       powerState: powerState ?? this.powerState,
