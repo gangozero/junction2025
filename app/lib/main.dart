@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'services/storage/hive_service.dart';
+
 /// Entry point for Harvia MSGA application
-///
-/// This is a minimal setup - full implementation will be added in Phase 2
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive for local storage
+  await HiveService.initialize();
+
   runApp(const ProviderScope(child: HarviaMsgaApp()));
 }
 
@@ -32,53 +40,29 @@ class HarviaMsgaApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system,
-      home: const PlaceholderScreen(),
+      home: const AuthGate(),
     );
   }
 }
 
-/// Temporary placeholder screen
-/// Will be replaced with proper authentication and routing in Phase 3+
-class PlaceholderScreen extends StatelessWidget {
-  const PlaceholderScreen({super.key});
+/// Authentication gate widget
+///
+/// Routes user to login or dashboard based on auth state
+class AuthGate extends ConsumerWidget {
+  const AuthGate({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Harvia MSGA'), centerTitle: true),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.hot_tub,
-              size: 120,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Sauna Controller',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Setup Complete ✓',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 48),
-              child: Text(
-                'Phase 1 (T001-T008) completed successfully.\nReady for Phase 2 foundational implementation.',
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+
+    // Show loading indicator while checking auth state
+    if (authState.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    // Route based on authentication status
+    return authState.isAuthenticated
+        ? const DashboardScreen()
+        : const LoginScreen();
   }
 }

@@ -246,6 +246,7 @@ class ApiConstants {
   // ============================================================================
 
   /// Secure storage keys
+  static const String idTokenKey = 'harvia_id_token';
   static const String accessTokenKey = 'harvia_access_token';
   static const String refreshTokenKey = 'harvia_refresh_token';
   static const String userIdKey = 'harvia_user_id';
@@ -291,12 +292,14 @@ class ApiConstants {
 
   /// Get full GraphQL HTTP URL
   static String getGraphqlHttpUrl() {
-    return '$graphqlBaseUrl$graphqlHttpPath';
+    // URL already includes /graphql path from service discovery
+    return graphqlBaseUrl;
   }
 
   /// Get full GraphQL WebSocket URL
   static String getGraphqlWsUrl() {
-    return '$graphqlWsUrl$graphqlWsPath';
+    // URL already includes /graphql path from service discovery
+    return graphqlWsUrl;
   }
 
   /// Get authorization header value

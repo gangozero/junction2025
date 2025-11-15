@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/layout_constants.dart';
 import '../../../device/domain/entities/sauna_controller.dart';
-import '../providers/device_state_provider.dart';
+import '../providers/device_list_provider.dart';
 import 'heating_status.dart';
 import 'temperature_display.dart';
 
@@ -14,84 +14,80 @@ import 'temperature_display.dart';
 ///
 /// Displays sauna controller status with real-time updates
 class DeviceStatusCard extends ConsumerWidget {
-  final SaunaController device;
+  final String deviceId;
 
-  const DeviceStatusCard({required this.device, super.key});
+  const DeviceStatusCard({required this.deviceId, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Subscribe to real-time updates
-    final deviceStateAsync = ref.watch(
-      deviceStateStreamProvider(device.deviceId),
-    );
+    final deviceStateAsync = ref.watch(deviceStateProvider(deviceId));
 
-    // Use stream data if available, otherwise use initial device
-    final currentDevice = deviceStateAsync.asData?.value ?? device;
-
-    return Card(
-      elevation: LayoutConstants.cardElevation,
-      child: InkWell(
-        onTap: () {
-          // TODO: Navigate to device details screen
-        },
-        borderRadius: BorderRadius.circular(LayoutConstants.cardBorderRadius),
-        child: Padding(
-          padding: const EdgeInsets.all(LayoutConstants.spacingMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header: Device name and connection status
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      currentDevice.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+    return deviceStateAsync.when(
+      data: (device) => Card(
+        elevation: LayoutConstants.cardElevation,
+        child: InkWell(
+          onTap: () {
+            // TODO: Navigate to device details screen
+          },
+          borderRadius: BorderRadius.circular(LayoutConstants.cardBorderRadius),
+          child: Padding(
+            padding: const EdgeInsets.all(LayoutConstants.spacingMedium),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header: Device name and connection status
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        device.name,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  _ConnectionStatusIndicator(
-                    status: currentDevice.connectionStatus,
-                  ),
-                ],
-              ),
-              const SizedBox(height: LayoutConstants.spacingSmall),
-
-              // Model number
-              Text(
-                currentDevice.modelNumber,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey),
-              ),
-              const SizedBox(height: LayoutConstants.spacingMedium),
-
-              // Temperature display
-              if (currentDevice.hasTemperature)
-                TemperatureDisplay(device: currentDevice)
-              else
-                const Text(
-                  'No temperature data',
-                  style: TextStyle(color: Colors.grey),
+                    _ConnectionStatusIndicator(status: device.connectionStatus),
+                  ],
                 ),
-              const SizedBox(height: LayoutConstants.spacingMedium),
+                const SizedBox(height: LayoutConstants.spacingSmall),
 
-              // Heating status and power state
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  HeatingStatusWidget(status: currentDevice.heatingStatus),
-                  _PowerStateIndicator(state: currentDevice.powerState),
-                ],
-              ),
-            ],
+                // Model number
+                Text(
+                  device.modelNumber,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                ),
+                const SizedBox(height: LayoutConstants.spacingMedium),
+
+                // Temperature display
+                if (device.hasTemperature)
+                  TemperatureDisplay(device: device)
+                else
+                  const Text(
+                    'No temperature data',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                const SizedBox(height: LayoutConstants.spacingMedium),
+
+                // Heating status and power state
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    HeatingStatusWidget(status: device.heatingStatus),
+                    _PowerStateIndicator(state: device.powerState),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('Error: $err')),
     );
   }
 }

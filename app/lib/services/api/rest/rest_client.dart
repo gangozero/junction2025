@@ -11,25 +11,44 @@ import '../../../core/error/failures.dart';
 import '../../../core/utils/logger.dart';
 import '../../storage/secure_storage_service.dart';
 
+/// REST API service types
+enum RestApiService {
+  /// Authentication and generic operations
+  generics,
+
+  /// Device management and configuration
+  device,
+
+  /// Latest data and events
+  data,
+
+  /// User management
+  users,
+}
+
 /// REST API client service
 ///
 /// Manages HTTP requests with authentication and error handling
+/// Supports different base URLs for different service types
 class RestApiClient {
   RestApiClient._();
 
-  static Dio? _dio;
+  static final Map<RestApiService, Dio> _clients = {};
 
-  /// Get Dio instance
+  /// Get Dio instance for specific service type
   ///
-  /// Initializes Dio on first access with interceptors
-  static Dio getDio() {
-    if (_dio != null) return _dio!;
+  /// Creates a new Dio instance with appropriate base URL if needed
+  static Dio getDio([RestApiService service = RestApiService.generics]) {
+    if (_clients.containsKey(service)) {
+      return _clients[service]!;
+    }
 
-    AppLogger.i('Initializing REST API client');
+    final baseUrl = _getBaseUrlForService(service);
+    AppLogger.i('Initializing REST API client for $service at $baseUrl');
 
-    _dio = Dio(
+    final dio = Dio(
       BaseOptions(
-        baseUrl: ApiConstants.restBaseUrl,
+        baseUrl: baseUrl,
         connectTimeout: const Duration(
           milliseconds: ApiConstants.connectionTimeout,
         ),
@@ -45,14 +64,29 @@ class RestApiClient {
     );
 
     // Add interceptors
-    _dio!.interceptors.addAll([
+    dio.interceptors.addAll([
       _AuthInterceptor(),
       _LoggingInterceptor(),
       _ErrorInterceptor(),
     ]);
 
-    AppLogger.i('REST API client initialized');
-    return _dio!;
+    _clients[service] = dio;
+    AppLogger.i('REST API client initialized for $service');
+    return dio;
+  }
+
+  /// Get base URL for service type
+  static String _getBaseUrlForService(RestApiService service) {
+    switch (service) {
+      case RestApiService.generics:
+        return ApiConstants.restGenericsBaseUrl;
+      case RestApiService.device:
+        return ApiConstants.restDeviceBaseUrl;
+      case RestApiService.data:
+        return ApiConstants.restDataBaseUrl;
+      case RestApiService.users:
+        return ApiConstants.restUsersBaseUrl;
+    }
   }
 
   /// Execute GET request
@@ -190,11 +224,13 @@ class RestApiClient {
     }
   }
 
-  /// Reset client
+  /// Reset all clients
   static void reset() {
-    AppLogger.i('Resetting REST API client');
-    _dio?.close();
-    _dio = null;
+    AppLogger.i('Resetting REST API clients');
+    for (final client in _clients.values) {
+      client.close();
+    }
+    _clients.clear();
   }
 }
 

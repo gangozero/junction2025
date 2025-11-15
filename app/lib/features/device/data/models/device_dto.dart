@@ -39,22 +39,33 @@ class DeviceDto {
 
   /// From GraphQL JSON
   factory DeviceDto.fromJson(Map<String, dynamic> json) {
+    // Parse attr array into a map for easier access
+    final attrs = <String, String>{};
+    final attrList = json['attr'] as List<dynamic>?;
+    if (attrList != null) {
+      for (final attr in attrList) {
+        final key = attr['key'] as String?;
+        final value = attr['value'] as String?;
+        if (key != null && value != null) {
+          attrs[key] = value;
+        }
+      }
+    }
+
     return DeviceDto(
       id: json['id'] as String,
-      name: json['name'] as String,
-      modelNumber: json['modelNumber'] as String,
-      serialNumber: json['serialNumber'] as String,
-      powerState: json['powerState'] as String,
-      heatingStatus: json['heatingStatus'] as String,
-      connectionStatus: json['connectionStatus'] as String,
-      currentTemperature: json['currentTemperature'] as double?,
-      targetTemperature: json['targetTemperature'] as double?,
-      minTemperature: json['minTemperature'] as double?,
-      maxTemperature: json['maxTemperature'] as double?,
-      lastUpdated: json['lastUpdated'] as String?,
-      linkedSensorIds: (json['linkedSensorIds'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      name: attrs['name'] ?? '',
+      modelNumber: attrs['modelNumber'] ?? attrs['model'] ?? '',
+      serialNumber: attrs['serialNumber'] ?? attrs['serial'] ?? '',
+      powerState: attrs['powerState'] ?? 'unknown',
+      heatingStatus: attrs['heatingStatus'] ?? 'unknown',
+      connectionStatus: attrs['connectionStatus'] ?? 'unknown',
+      currentTemperature: double.tryParse(attrs['currentTemperature'] ?? ''),
+      targetTemperature: double.tryParse(attrs['targetTemperature'] ?? ''),
+      minTemperature: double.tryParse(attrs['minTemperature'] ?? ''),
+      maxTemperature: double.tryParse(attrs['maxTemperature'] ?? ''),
+      lastUpdated: attrs['lastUpdated'],
+      linkedSensorIds: attrs['linkedSensorIds']?.split(','),
     );
   }
 

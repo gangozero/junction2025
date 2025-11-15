@@ -33,7 +33,7 @@ class LoginRequest extends Equatable {
   /// Convert to JSON for API request
   Map<String, dynamic> toJson() {
     return {
-      'email': email,
+      'username': email, // API expects 'username' field, not 'email'
       'password': password,
       if (deviceId != null) 'device_id': deviceId,
       if (deviceName != null) 'device_name': deviceName,

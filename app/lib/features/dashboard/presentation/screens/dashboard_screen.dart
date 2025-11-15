@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/layout_constants.dart';
+import '../../../../services/api/graphql/raw_graphql_test.dart';
 import '../providers/device_list_provider.dart';
 import '../widgets/device_status_card.dart';
 
@@ -33,6 +34,11 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Dashboard'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report),
+            onPressed: () => testRawGraphQLQuery(),
+            tooltip: 'Test Raw GraphQL',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(deviceListProvider),
@@ -82,7 +88,9 @@ class DashboardScreen extends ConsumerWidget {
                           padding: const EdgeInsets.only(
                             bottom: LayoutConstants.spacingMedium,
                           ),
-                          child: DeviceStatusCard(device: devices[index]),
+                          child: DeviceStatusCard(
+                            deviceId: devices[index].deviceId,
+                          ),
                         );
                       },
                     )
@@ -95,7 +103,9 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                       itemCount: devices.length,
                       itemBuilder: (context, index) {
-                        return DeviceStatusCard(device: devices[index]);
+                        return DeviceStatusCard(
+                          deviceId: devices[index].deviceId,
+                        );
                       },
                     ),
             ),

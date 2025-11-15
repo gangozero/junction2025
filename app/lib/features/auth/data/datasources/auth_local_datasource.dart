@@ -41,6 +41,7 @@ class AuthLocalDataSource {
       AppLogger.cache('save', 'api_session', hit: null);
 
       await Future.wait<void>([
+        // Custom keys for auth module
         SecureStorageService.save(_keyIdToken, session.idToken),
         SecureStorageService.save(_keyAccessToken, session.accessToken),
         SecureStorageService.save(_keyRefreshToken, session.refreshToken),
@@ -54,6 +55,12 @@ class AuthLocalDataSource {
           session.createdAt.toIso8601String(),
         ),
         SecureStorageService.save(_keyUserId, session.userId),
+
+        // Standard keys for GraphQL client and other services
+        SecureStorageService.saveIdToken(session.idToken),
+        SecureStorageService.saveAccessToken(session.accessToken),
+        SecureStorageService.saveRefreshToken(session.refreshToken),
+        SecureStorageService.saveUserId(session.userId),
       ]);
 
       AppLogger.auth('Session saved', details: {'userId': session.userId});

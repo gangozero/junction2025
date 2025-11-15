@@ -17,10 +17,12 @@ import '../models/token_response.dart';
 /// Authentication remote data source
 ///
 /// Provides methods for interacting with the authentication API.
+/// Uses the REST API generics service for auth operations.
 class AuthRemoteDataSource {
   final Dio _dio;
 
-  AuthRemoteDataSource({Dio? dio}) : _dio = dio ?? RestApiClient.getDio();
+  AuthRemoteDataSource({Dio? dio})
+    : _dio = dio ?? RestApiClient.getDio(RestApiService.generics);
 
   /// Login with email and password
   ///

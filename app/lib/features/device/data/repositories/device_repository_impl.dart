@@ -95,6 +95,23 @@ class DeviceRepositoryImpl implements DeviceRepository {
   }
 
   @override
+  Future<Either<Failure, List<Map<String, dynamic>>>> getLatestMeasurements(
+    String deviceId,
+  ) async {
+    try {
+      final measurements = await _remoteDataSource.getLatestMeasurements(
+        deviceId,
+      );
+      return Right(measurements);
+    } on OperationException catch (e) {
+      return Left(_handleGraphQLException(e));
+    } catch (e) {
+      AppLogger.e('Failed to get latest measurements', error: e);
+      return Left(UnknownFailure('Failed to get latest measurements', e));
+    }
+  }
+
+  @override
   Stream<Either<Failure, SaunaController>> subscribeToDeviceState(
     String deviceId,
   ) async* {

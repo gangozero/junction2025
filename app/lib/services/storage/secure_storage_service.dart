@@ -30,6 +30,32 @@ class SecureStorageService {
     ),
   );
 
+  /// Save ID token
+  static Future<void> saveIdToken(String token) async {
+    try {
+      AppLogger.d('Saving ID token to ${PlatformUtils.storageType}');
+      await _storage.write(key: ApiConstants.idTokenKey, value: token);
+      AppLogger.i('ID token saved');
+    } catch (e, stackTrace) {
+      AppLogger.e('Failed to save ID token', error: e, stackTrace: stackTrace);
+      throw SecureStorageFailure('Failed to save ID token: $e');
+    }
+  }
+
+  /// Get ID token
+  static Future<String?> getIdToken() async {
+    try {
+      final token = await _storage.read(key: ApiConstants.idTokenKey);
+      AppLogger.d(
+        'ID token retrieved: ${token != null ? '[PRESENT]' : '[ABSENT]'}',
+      );
+      return token;
+    } catch (e, stackTrace) {
+      AppLogger.e('Failed to get ID token', error: e, stackTrace: stackTrace);
+      throw SecureStorageFailure('Failed to retrieve ID token: $e');
+    }
+  }
+
   /// Save access token
   static Future<void> saveAccessToken(String token) async {
     try {
@@ -186,6 +212,7 @@ class SecureStorageService {
       AppLogger.w('Clearing all authentication data');
 
       await Future.wait([
+        delete(ApiConstants.idTokenKey),
         delete(ApiConstants.accessTokenKey),
         delete(ApiConstants.refreshTokenKey),
         delete(ApiConstants.userIdKey),

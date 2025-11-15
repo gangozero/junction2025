@@ -29,6 +29,15 @@ abstract class DeviceRepository {
   /// Returns [ApiFailure] if device not found or API error.
   Future<Either<Failure, SaunaController>> getDeviceState(String deviceId);
 
+  /// Get latest measurements for a device
+  ///
+  /// [deviceId] - ID of the device to fetch measurements for
+  ///
+  /// Returns a list of measurements.
+  Future<Either<Failure, List<Map<String, dynamic>>>> getLatestMeasurements(
+    String deviceId,
+  );
+
   /// Subscribe to device state changes via WebSocket
   ///
   /// [deviceId] - ID of the device to subscribe to

@@ -1,10 +1,11 @@
 /// GraphQL Client Configuration for Harvia MSGA
 ///
-/// Configures GraphQL client with WebSocket support for subscriptions,
-/// auto-reconnection, and authentication handling
+/// Configures GraphQL client with Dio-based HTTP link for AWS AppSync compatibility
 library;
 
+import 'package:dio/dio.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:gql_dio_link/gql_dio_link.dart';
 
 import '../../../core/constants/api_constants.dart';
 import '../../../core/error/failures.dart';
@@ -24,24 +25,65 @@ class GraphQLClientService {
   ///
   /// Initializes client on first access with auth token
   static Future<GraphQLClient> getClient() async {
-    if (_client != null) return _client!;
+    // Always recreate client to get fresh token
+    // TODO: Optimize by checking token expiry instead of recreating
+    _client = null;
 
-    AppLogger.i('Initializing GraphQL client');
+    AppLogger.i('Initializing GraphQL client with DioLink');
 
-    final httpLink = HttpLink(ApiConstants.getGraphqlHttpUrl());
+    // Get ID token for authentication
+    final token = await SecureStorageService.getIdToken();
+    if (token == null) {
+      AppLogger.w('No ID token available - GraphQL requests will fail');
+      throw const AuthFailure('No authentication token available');
+    }
 
-    final authLink = AuthLink(
-      getToken: () async {
-        final token = await SecureStorageService.getAccessToken();
-        if (token != null) {
-          AppLogger.d('Adding auth token to GraphQL request');
-          return ApiConstants.getAuthHeader(token);
-        }
-        return null;
-      },
+    AppLogger.d('ID token retrieved for GraphQL client');
+    AppLogger.d('Token (first 20 chars): ${token.substring(0, 20)}...');
+
+    final endpoint = ApiConstants.getGraphqlHttpUrl();
+    AppLogger.d('GraphQL endpoint: $endpoint');
+
+    // Create Dio client with AWS AppSync-compatible headers
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ),
     );
 
-    final link = authLink.concat(httpLink);
+    // Add logging interceptor and fix Accept header
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          // Force correct Accept header (DioLink changes it to */*)
+          options.headers['Accept'] = 'application/json';
+          AppLogger.d('DioLink Request: ${options.method} ${options.uri}');
+          AppLogger.d('DioLink Headers: ${options.headers}');
+          AppLogger.d('DioLink Body: ${options.data}');
+          return handler.next(options);
+        },
+        onResponse: (response, handler) {
+          AppLogger.d('DioLink Response: ${response.statusCode}');
+          return handler.next(response);
+        },
+        onError: (error, handler) {
+          AppLogger.e(
+            'DioLink Error: ${error.response?.statusCode}',
+            error: error,
+          );
+          return handler.next(error);
+        },
+      ),
+    );
+
+    // Use DioLink with the configured Dio client
+    final link = DioLink(endpoint, client: dio);
 
     _client = GraphQLClient(
       link: link,
@@ -59,7 +101,7 @@ class GraphQLClientService {
       ),
     );
 
-    AppLogger.i('GraphQL client initialized');
+    AppLogger.i('GraphQL client initialized with DioLink and auth headers');
     return _client!;
   }
 

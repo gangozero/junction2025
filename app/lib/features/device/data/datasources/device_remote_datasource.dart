@@ -1,10 +1,16 @@
 /// Device remote data source using GraphQL
 library;
 
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/error/failures.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../services/api/graphql/graphql_client.dart';
+import '../../../../services/storage/secure_storage_service.dart';
 import '../models/device_dto.dart';
 import '../models/sensor_dto.dart';
 
@@ -12,81 +18,200 @@ import '../models/sensor_dto.dart';
 ///
 /// Handles GraphQL queries, mutations, and subscriptions for devices and sensors
 class DeviceRemoteDataSource {
-  final GraphQLClient Function() _getClient;
+  final Future<GraphQLClient> Function() _getClient;
   final Future<WebSocketLink> Function() _getWsLink;
 
   DeviceRemoteDataSource({
-    GraphQLClient Function()? getClient,
+    Future<GraphQLClient> Function()? getClient,
     Future<WebSocketLink> Function()? getWsLink,
-  }) : _getClient = getClient ?? (() => throw UnimplementedError()),
-       _getWsLink = getWsLink ?? (() => throw UnimplementedError());
+  }) : _getClient = getClient ?? GraphQLClientService.getClient,
+       _getWsLink = getWsLink ?? GraphQLClientService.getWebSocketLink;
 
   /// Default constructor using GraphQLClientService
   factory DeviceRemoteDataSource.create() {
     return DeviceRemoteDataSource(
-      getClient: () {
-        // Synchronous wrapper - client should be pre-initialized
-        return GraphQLClientService.getClient() as GraphQLClient;
-      },
+      getClient: GraphQLClientService.getClient,
       getWsLink: GraphQLClientService.getWebSocketLink,
     );
   }
 
   /// List all devices for current user
   ///
-  /// GraphQL query: listDevices
+  /// GraphQL query: usersDevicesList
   ///
   /// Throws [OperationException] on GraphQL errors.
   Future<List<DeviceDto>> listDevices() async {
     try {
-      AppLogger.api('GraphQL', 'listDevices query');
+      AppLogger.api('GraphQL', 'usersDevicesList query');
 
       const query = r'''
-        query ListDevices {
-          listDevices {
-            id
-            name
-            modelNumber
-            serialNumber
-            powerState
-            heatingStatus
-            connectionStatus
-            currentTemperature
-            targetTemperature
-            minTemperature
-            maxTemperature
-            lastUpdated
-            linkedSensorIds
+        query ListMyDevices {
+          usersDevicesList {
+            devices {
+              id
+              type
+              attr {
+                key
+                value
+              }
+            }
           }
         }
       ''';
 
-      final result = await _getClient().query(
-        QueryOptions(
-          document: gql(query),
-          fetchPolicy: FetchPolicy.networkOnly,
+      final token = await SecureStorageService.getIdToken();
+      if (token == null) {
+        throw const AuthFailure('No ID token for listDevices');
+      }
+
+      final dio = Dio();
+      final response = await dio.post<Map<String, dynamic>>(
+        ApiConstants.graphqlDeviceHttpUrl,
+        data: {'query': query},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
         ),
       );
 
-      if (result.hasException) {
-        AppLogger.e('listDevices query failed', error: result.exception);
-        throw result.exception!;
+      if (response.statusCode != 200 || response.data == null) {
+        throw Exception('Failed to load devices: ${response.statusCode}');
       }
 
-      final data = result.data?['listDevices'] as List<dynamic>?;
-      if (data == null) {
-        AppLogger.w('listDevices returned null data');
+      final responseData = response.data!['data'];
+      if (responseData == null) {
+        final errors = response.data!['errors'];
+        AppLogger.e('GraphQL query returned errors', error: errors);
+        throw Exception('GraphQL query failed: $errors');
+      }
+
+      final devicesList =
+          responseData['usersDevicesList'] as Map<String, dynamic>?;
+      final devices = devicesList?['devices'] as List<dynamic>?;
+
+      if (devices == null) {
+        AppLogger.w('usersDevicesList returned null devices');
         return [];
       }
 
-      AppLogger.api('GraphQL', 'listDevices returned ${data.length} devices');
+      AppLogger.api(
+        'GraphQL',
+        'usersDevicesList returned ${devices.length} devices',
+      );
 
-      return data
+      return devices
           .map((e) => DeviceDto.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
       AppLogger.e('listDevices failed', error: e);
       rethrow;
+    }
+  }
+
+  /// Get latest measurements for a device
+  ///
+  /// GraphQL query: devicesMeasurementsLatest
+  ///
+  /// Returns a list of measurement data objects parsed from the AWSJSON data field.
+  Future<List<Map<String, dynamic>>> getLatestMeasurements(
+    String deviceId,
+  ) async {
+    AppLogger.api('GraphQL', 'devicesMeasurementsLatest query for $deviceId');
+    try {
+      const query = r'''
+        query devicesMeasurementsLatest($deviceId: String!) {
+          devicesMeasurementsLatest(deviceId: $deviceId) {
+            deviceId
+            subId
+            timestamp
+            sessionId
+            type
+            data
+          }
+        }
+      ''';
+
+      final token = await SecureStorageService.getIdToken();
+      if (token == null) {
+        throw const AuthFailure('No ID token for getLatestMeasurements');
+      }
+
+      final dio = Dio();
+      final response = await dio.post<Map<String, dynamic>>(
+        ApiConstants.graphqlDataHttpUrl,
+        data: {
+          'query': query,
+          'variables': {'deviceId': deviceId},
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode != 200 || response.data == null) {
+        throw Exception('Failed to load measurements: ${response.statusCode}');
+      }
+
+      final responseData = response.data!['data'];
+      if (responseData == null) {
+        final errors = response.data!['errors'];
+        AppLogger.e('GraphQL query returned errors', error: errors);
+        throw Exception('GraphQL query failed: $errors');
+      }
+
+      AppLogger.d(
+        'Raw measurement response for $deviceId: ${jsonEncode(responseData)}',
+      );
+
+      final latestMeasurements =
+          responseData['devicesMeasurementsLatest'] as List<dynamic>?;
+
+      if (latestMeasurements == null || latestMeasurements.isEmpty) {
+        AppLogger.w('devicesMeasurementsLatest returned null or empty');
+        return [];
+      }
+
+      // Parse the measurement items and extract data from the JSON strings
+      final parsedMeasurements = <Map<String, dynamic>>[];
+
+      for (final item in latestMeasurements) {
+        final measurementItem = item as Map<String, dynamic>;
+        final dataJson = measurementItem['data'] as String?;
+
+        if (dataJson != null && dataJson.isNotEmpty) {
+          try {
+            // The 'data' field is an AWSJSON string, parse it
+            final parsedData = jsonDecode(dataJson) as Map<String, dynamic>;
+            // Add metadata from the measurement item
+            parsedMeasurements.add({
+              ...parsedData,
+              '_deviceId': measurementItem['deviceId'],
+              '_subId': measurementItem['subId'],
+              '_timestamp': measurementItem['timestamp'],
+              '_type': measurementItem['type'],
+            });
+          } catch (e) {
+            AppLogger.w('Failed to parse data JSON for measurement: $e');
+          }
+        }
+      }
+
+      AppLogger.d(
+        'Parsed ${parsedMeasurements.length} measurements for $deviceId',
+      );
+
+      return parsedMeasurements;
+    } catch (e) {
+      AppLogger.e('getLatestMeasurements failed for $deviceId', error: e);
+      // Return empty list on failure to not break the UI for a single device
+      return [];
     }
   }
 
@@ -119,7 +244,8 @@ class DeviceRemoteDataSource {
         }
       ''';
 
-      final result = await _getClient().query(
+      final client = await _getClient();
+      final result = await client.query(
         QueryOptions(
           document: gql(query),
           variables: {'deviceId': deviceId},
@@ -235,7 +361,8 @@ class DeviceRemoteDataSource {
         }
       ''';
 
-      final result = await _getClient().query(
+      final client = await _getClient();
+      final result = await client.query(
         QueryOptions(
           document: gql(query),
           variables: {'controllerId': controllerId},
@@ -290,7 +417,8 @@ class DeviceRemoteDataSource {
         }
       ''';
 
-      final result = await _getClient().query(
+      final client = await _getClient();
+      final result = await client.query(
         QueryOptions(
           document: gql(query),
           variables: {'sensorId': sensorId},
