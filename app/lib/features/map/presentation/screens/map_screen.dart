@@ -2,6 +2,7 @@
 library;
 
 import 'dart:developer' as developer;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -28,11 +29,28 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   // Cached feature lists so we can rebuild layers after style load
   List<Feature<Point>> _controllerPoints = [];
   List<Feature<Point>> _sensorPoints = [];
+  // Random weights map for each region id (4-10 inclusive)
+  late final Map<int, int> _regionWeights;
 
   @override
   void initState() {
     super.initState();
     developer.log('[Map] MapScreen initState', name: 'HarviaMSGA');
+    _regionWeights = _generateRandomWeights();
+  }
+
+  /// Generate random weights (8-20 inclusive) for region IDs 0-335
+  Map<int, int> _generateRandomWeights() {
+    final random = math.Random();
+    final weights = <int, int>{};
+    for (int id = 0; id <= 335; id++) {
+      weights[id] = 8 + random.nextInt(13); // 8-20 inclusive
+    }
+    developer.log(
+      '[Map] Generated ${weights.length} random weights (sample: ${weights.entries.take(5).map((e) => '${e.key}:${e.value}').join(', ')})',
+      name: 'HarviaMSGA',
+    );
+    return weights;
   }
 
   @override
@@ -126,28 +144,39 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       name: 'HarviaMSGA',
                     );
 
-                    // Add the fill layer - blue for all, red for id=52
+                    // Add the fill layer with red gradient based on weights
+                    // Build interpolate expression for red gradient
+                    final interpolateExpression = [
+                      'interpolate',
+                      ['linear'],
+                      ['id'],
+                      // Generate stops for each ID with its weight mapped to red intensity
+                      ..._regionWeights.entries.expand((entry) {
+                        final id = entry.key;
+                        final weight = entry.value;
+                        // Map weight 8-20 to red intensity (almost transparent to dark)
+                        // weight 8 = rgb(255, 200, 200) light/almost transparent red
+                        // weight 20 = rgb(139, 0, 0) dark red
+                        final redValue = 255 - ((weight - 8) * 116 ~/ 12);
+                        final greenBlueValue = 200 - ((weight - 8) * 200 ~/ 12);
+                        final color =
+                            '#${redValue.toRadixString(16).padLeft(2, '0')}${greenBlueValue.toRadixString(16).padLeft(2, '0')}${greenBlueValue.toRadixString(16).padLeft(2, '0')}';
+                        return [id, color];
+                      }).toList(),
+                    ];
+
                     await style.addLayer(
                       FillStyleLayer(
                         id: 'regions-layer',
                         sourceId: 'regions-source',
                         paint: {
-                          'fill-color': [
-                            'case',
-                            [
-                              '==',
-                              ['id'],
-                              52,
-                            ],
-                            '#FF0000', // Red for id=52
-                            '#0000FF', // Blue for all others
-                          ],
+                          'fill-color': interpolateExpression,
                           'fill-opacity': 0.5,
                         },
                       ),
                     );
                     developer.log(
-                      '[Map] ✅ GeoJSON fill layer added - id 52 in red, others in blue',
+                      '[Map] ✅ GeoJSON fill layer added with red gradient based on weights',
                       name: 'HarviaMSGA',
                     );
                   } catch (e, stack) {
