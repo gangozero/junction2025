@@ -51,6 +51,8 @@ class SaunaController extends Equatable {
   final double? targetTemperature;
   final double? minTemperature;
   final double? maxTemperature;
+  final double? currentHumidity;
+  final double? targetHumidity;
   final DateTime? lastUpdated;
   final List<String> linkedSensorIds;
 
@@ -66,6 +68,8 @@ class SaunaController extends Equatable {
     this.targetTemperature,
     this.minTemperature,
     this.maxTemperature,
+    this.currentHumidity,
+    this.targetHumidity,
     this.lastUpdated,
     this.linkedSensorIds = const [],
   });
@@ -83,6 +87,8 @@ class SaunaController extends Equatable {
     targetTemperature,
     minTemperature,
     maxTemperature,
+    currentHumidity,
+    targetHumidity,
     lastUpdated,
     linkedSensorIds,
   ];
@@ -96,6 +102,12 @@ class SaunaController extends Equatable {
 
   /// Check if controller has target temperature set
   bool get hasTarget => targetTemperature != null;
+
+  /// Check if controller has humidity data
+  bool get hasHumidity => currentHumidity != null;
+
+  /// Check if controller has target humidity set
+  bool get hasTargetHumidity => targetHumidity != null;
 
   /// Check if temperature is at target
   bool get isAtTarget {
@@ -134,6 +146,8 @@ class SaunaController extends Equatable {
     double? targetTemperature,
     double? minTemperature,
     double? maxTemperature,
+    double? currentHumidity,
+    double? targetHumidity,
     DateTime? lastUpdated,
     List<String>? linkedSensorIds,
   }) {
@@ -149,6 +163,8 @@ class SaunaController extends Equatable {
       targetTemperature: targetTemperature ?? this.targetTemperature,
       minTemperature: minTemperature ?? this.minTemperature,
       maxTemperature: maxTemperature ?? this.maxTemperature,
+      currentHumidity: currentHumidity ?? this.currentHumidity,
+      targetHumidity: targetHumidity ?? this.targetHumidity,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       linkedSensorIds: linkedSensorIds ?? this.linkedSensorIds,
     );

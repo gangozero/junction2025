@@ -185,10 +185,18 @@ class DeviceRemoteDataSource {
         final measurementItem = item as Map<String, dynamic>;
         final dataJson = measurementItem['data'] as String?;
 
+        AppLogger.d(
+          'Measurement item for $deviceId: subId=${measurementItem['subId']}, type=${measurementItem['type']}, hasData=${dataJson != null}',
+        );
+
         if (dataJson != null && dataJson.isNotEmpty) {
           try {
             // The 'data' field is an AWSJSON string, parse it
             final parsedData = jsonDecode(dataJson) as Map<String, dynamic>;
+            AppLogger.d(
+              'Parsed data for $deviceId: ${parsedData.keys.join(", ")}',
+            );
+
             // Add metadata from the measurement item
             parsedMeasurements.add({
               ...parsedData,
@@ -203,7 +211,7 @@ class DeviceRemoteDataSource {
         }
       }
 
-      AppLogger.d(
+      AppLogger.i(
         'Parsed ${parsedMeasurements.length} measurements for $deviceId',
       );
 

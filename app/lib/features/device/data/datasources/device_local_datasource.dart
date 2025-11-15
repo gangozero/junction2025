@@ -172,6 +172,8 @@ class DeviceLocalDataSource {
       'targetTemperature': device.targetTemperature,
       'minTemperature': device.minTemperature,
       'maxTemperature': device.maxTemperature,
+      'currentHumidity': device.currentHumidity,
+      'targetHumidity': device.targetHumidity,
       'lastUpdated': device.lastUpdated?.toIso8601String(),
       'linkedSensorIds': device.linkedSensorIds,
     };
@@ -200,6 +202,8 @@ class DeviceLocalDataSource {
       targetTemperature: map['targetTemperature'] as double?,
       minTemperature: map['minTemperature'] as double?,
       maxTemperature: map['maxTemperature'] as double?,
+      currentHumidity: map['currentHumidity'] as double?,
+      targetHumidity: map['targetHumidity'] as double?,
       lastUpdated: map['lastUpdated'] != null
           ? DateTime.parse(map['lastUpdated'] as String)
           : null,

@@ -18,6 +18,8 @@ class DeviceDto {
   final double? targetTemperature;
   final double? minTemperature;
   final double? maxTemperature;
+  final double? currentHumidity;
+  final double? targetHumidity;
   final String? lastUpdated;
   final List<String>? linkedSensorIds;
 
@@ -33,6 +35,8 @@ class DeviceDto {
     this.targetTemperature,
     this.minTemperature,
     this.maxTemperature,
+    this.currentHumidity,
+    this.targetHumidity,
     this.lastUpdated,
     this.linkedSensorIds,
   });
@@ -64,6 +68,8 @@ class DeviceDto {
       targetTemperature: double.tryParse(attrs['targetTemperature'] ?? ''),
       minTemperature: double.tryParse(attrs['minTemperature'] ?? ''),
       maxTemperature: double.tryParse(attrs['maxTemperature'] ?? ''),
+      currentHumidity: double.tryParse(attrs['currentHumidity'] ?? ''),
+      targetHumidity: double.tryParse(attrs['targetHumidity'] ?? ''),
       lastUpdated: attrs['lastUpdated'],
       linkedSensorIds: attrs['linkedSensorIds']?.split(','),
     );
@@ -83,6 +89,8 @@ class DeviceDto {
       if (targetTemperature != null) 'targetTemperature': targetTemperature,
       if (minTemperature != null) 'minTemperature': minTemperature,
       if (maxTemperature != null) 'maxTemperature': maxTemperature,
+      if (currentHumidity != null) 'currentHumidity': currentHumidity,
+      if (targetHumidity != null) 'targetHumidity': targetHumidity,
       if (lastUpdated != null) 'lastUpdated': lastUpdated,
       if (linkedSensorIds != null) 'linkedSensorIds': linkedSensorIds,
     };
@@ -102,6 +110,8 @@ class DeviceDto {
       targetTemperature: targetTemperature,
       minTemperature: minTemperature,
       maxTemperature: maxTemperature,
+      currentHumidity: currentHumidity,
+      targetHumidity: targetHumidity,
       lastUpdated: lastUpdated != null ? DateTime.parse(lastUpdated!) : null,
       linkedSensorIds: linkedSensorIds ?? [],
     );

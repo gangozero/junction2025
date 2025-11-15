@@ -67,9 +67,10 @@ class DeviceStatusCard extends ConsumerWidget {
                 if (device.hasTemperature)
                   TemperatureDisplay(device: device)
                 else
-                  const Text(
-                    'No temperature data',
-                    style: TextStyle(color: Colors.grey),
+                  _NoTemperatureDisplay(
+                    heatingStatus: device.heatingStatus,
+                    connectionStatus: device.connectionStatus,
+                    powerState: device.powerState,
                   ),
                 const SizedBox(height: LayoutConstants.spacingMedium),
 
@@ -114,6 +115,60 @@ class _ConnectionStatusIndicator extends StatelessWidget {
     return Tooltip(
       message: label,
       child: Icon(icon, color: color, size: LayoutConstants.iconSizeMedium),
+    );
+  }
+}
+
+/// No temperature display - shows context-aware message
+class _NoTemperatureDisplay extends StatelessWidget {
+  final HeatingStatus heatingStatus;
+  final ConnectionStatus connectionStatus;
+  final PowerState powerState;
+
+  const _NoTemperatureDisplay({
+    required this.heatingStatus,
+    required this.connectionStatus,
+    required this.powerState,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    String message;
+    IconData icon;
+    Color color;
+
+    // Determine message based on device state
+    if (connectionStatus == ConnectionStatus.offline) {
+      message = 'Device offline';
+      icon = Icons.cloud_off;
+      color = Colors.red;
+    } else if (powerState == PowerState.off) {
+      message = 'Device off';
+      icon = Icons.power_settings_new;
+      color = Colors.grey;
+    } else if (heatingStatus == HeatingStatus.idle) {
+      message = 'Standby mode';
+      icon = Icons.bedtime;
+      color = Colors.orange;
+    } else if (heatingStatus == HeatingStatus.cooling) {
+      message = 'Cooling down';
+      icon = Icons.ac_unit;
+      color = Colors.blue;
+    } else {
+      message = 'No temperature data';
+      icon = Icons.thermostat;
+      color = Colors.grey;
+    }
+
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 16),
+        const SizedBox(width: 8),
+        Text(
+          message,
+          style: TextStyle(color: color, fontStyle: FontStyle.italic),
+        ),
+      ],
     );
   }
 }

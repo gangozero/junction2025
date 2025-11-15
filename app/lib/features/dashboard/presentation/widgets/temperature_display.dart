@@ -82,6 +82,43 @@ class TemperatureDisplay extends StatelessWidget {
             ).textTheme.bodySmall?.copyWith(color: Colors.grey),
           ),
         ],
+
+        // Humidity display (if available)
+        if (device.hasHumidity) ...[
+          const SizedBox(height: LayoutConstants.spacingSmall),
+          Row(
+            children: [
+              const Icon(
+                Icons.water_drop,
+                size: LayoutConstants.iconSizeSmall,
+                color: Colors.blue,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${device.currentHumidity!.toStringAsFixed(1)}%',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (device.hasTargetHumidity) ...[
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.arrow_forward,
+                  size: LayoutConstants.iconSizeSmall - 4,
+                  color: Colors.grey,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${device.targetHumidity!.toStringAsFixed(0)}%',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                ),
+              ],
+            ],
+          ),
+        ],
       ],
     );
   }
