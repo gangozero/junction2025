@@ -16,6 +16,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../core/utils/logger.dart';
 import '../../core/utils/platform_utils.dart';
+import 'web_notification_permission_manager.dart'
+    if (dart.library.io) '../../core/utils/stub_web_manager.dart';
 
 /// Notification service for cross-platform local notifications
 class NotificationService {
@@ -228,15 +230,33 @@ class NotificationService {
 
   /// Request web notification permissions
   Future<bool> _requestWebPermissions() async {
-    // Note: Actual web notification permission request must be done via JS interop
-    // This is a placeholder for the web implementation
-    // In production, use package:web or dart:js_interop to call Notification.requestPermission()
+    if (!kIsWeb) {
+      AppLogger.w('Not running on web platform');
+      return false;
+    }
 
-    AppLogger.i('Web notification permission request (requires JS interop)');
+    try {
+      final webManager = WebNotificationPermissionManager();
 
-    // For now, return false to indicate web notifications need manual implementation
-    // This will cause graceful fallback to in-app notifications
-    return false;
+      if (!webManager.isSupported) {
+        AppLogger.w('Browser does not support notifications');
+        return false;
+      }
+
+      if (webManager.hasPermission) {
+        AppLogger.i('Web notifications already permitted');
+        return true;
+      }
+
+      AppLogger.i('Requesting web notification permission');
+      final granted = await webManager.requestPermission();
+
+      AppLogger.i('Web notification permission: $granted');
+      return granted;
+    } catch (e) {
+      AppLogger.e('Error requesting web permissions', error: e);
+      return false;
+    }
   }
 
   /// Show notification

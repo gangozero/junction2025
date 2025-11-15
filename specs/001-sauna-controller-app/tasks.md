@@ -225,28 +225,30 @@ This task list has been updated to comply with all five NON-NEGOTIABLE principle
 - [x] T077 [US6] Create events repository interface in lib/features/events/domain/repositories/events_repository.dart
 - [x] T078 [US6] Create GraphQL events data source in lib/features/events/data/datasources/events_remote_datasource.dart (listEvents query with filters, onEvent subscription)
 - [x] T079 [US6] Implement events cache in lib/features/events/data/datasources/events_local_datasource.dart with ring buffer (max 1000 events) using Hive
-- [ ] T080 [US6] Implement events repository in lib/features/events/data/repositories/events_repository_impl.dart
-- [ ] T081 [US6] Create event stream provider in lib/features/events/presentation/providers/events_provider.dart for WebSocket subscriptions
-- [ ] T082 [US6] Implement platform-specific notification dispatcher in lib/services/notifications/event_notification_handler.dart (mobile: flutter_local_notifications, web: browser notifications with permission request + in-app fallback)
-- [ ] T082a [US6] Create widget test files test/widget/events/events_screen_test.dart, event_filter_test.dart, event_list_item_test.dart (REQUIRED before T083-T085)
-- [ ] T083 [US6] Create event history screen in lib/features/events/presentation/screens/events_screen.dart with responsive list (mobile: single column, web: table view)
-- [ ] T084 [P] [US6] Create event filter widget in lib/features/events/presentation/widgets/event_filter.dart (type, severity, date range, device)
-- [ ] T085 [P] [US6] Create event list item widget in lib/features/events/presentation/widgets/event_list_item.dart
-- [ ] T086 [US6] Create notification settings screen in lib/features/events/presentation/screens/notification_settings_screen.dart for configuring which event types trigger notifications
-- [ ] T087 [US6] Implement browser notification permission request flow for web platform
-- [ ] T088 [US6] Add event acknowledgment functionality
+- [x] T080 [US6] Implement events repository in lib/features/events/data/repositories/events_repository_impl.dart
+- [x] T081 [US6] Create event stream provider in lib/features/events/presentation/providers/events_provider.dart for WebSocket subscriptions
+- [x] T082 [US6] Implement platform-specific notification dispatcher in lib/services/notifications/event_notification_handler.dart (mobile: flutter_local_notifications, web: browser notifications with permission request + in-app fallback)
+- [x] T082a [US6] Create widget test files test/widget/events/events_screen_test.dart, event_filter_test.dart, event_list_item_test.dart (REQUIRED before T083-T085)
+- [x] T083 [US6] Create event history screen in lib/features/events/presentation/screens/events_screen.dart with responsive list (mobile: single column, web: table view)
+- [x] T084 [P] [US6] Create event filter widget in lib/features/events/presentation/widgets/event_filter.dart (type, severity, date range, device)
+- [x] T085 [P] [US6] Create event list item widget in lib/features/events/presentation/widgets/event_list_item.dart
+- [x] T086 [US6] Create notification settings screen in lib/features/events/presentation/screens/notification_settings_screen.dart for configuring which event types trigger notifications
+- [x] T087 [US6] Implement browser notification permission request flow for web platform
+- [x] T088 [US6] Add event acknowledgment functionality
 
 **Checkpoint**: ✅ Events complete - users receive notifications and can review filtered history
 
 ---
 
-## Phase 8: User Story 5 - Scheduling (Priority: P4)
+## Phase 8: User Story 5 - Scheduling (Priority: P4) ⚠️ EXCLUDED FROM MVP
+
+**Status**: **DEFERRED TO V1.1+** - Excluded from MVP due to complexity of cross-platform background execution (workmanager limitations, service worker reliability)
 
 **Goal**: Create, manage, and execute heating schedules with platform-specific background execution
 
 **Independent Test**: Create schedule for future time, verify saved locally, confirm app sends commands at scheduled time (mobile: via workmanager, web: via service worker with wake notification)
 
-### Implementation for US5
+### Implementation for US5 (DEFERRED)
 
 - [ ] T089 [P] [US5] Create HeatingSchedule entity in lib/features/schedule/domain/entities/heating_schedule.dart
 - [ ] T090 [P] [US5] Create schedule DTOs in lib/features/schedule/data/models/schedule_dto.dart with Hive type adapter
@@ -270,9 +272,9 @@ This task list has been updated to comply with all five NON-NEGOTIABLE principle
 
 ---
 
-## Phase 9: Polish & Cross-Cutting Concerns
+## Phase 9: Polish & Cross-Cutting Concerns (MVP V1.0)
 
-**Purpose**: Final improvements affecting multiple features and platforms
+**Purpose**: Final improvements affecting multiple features and platforms before V1.0 release
 
 - [ ] T105 [P] Implement comprehensive offline mode with sync queue for: power commands, temperature settings, schedule CRUD operations, event acknowledgments (integrates with T061 command queue)
 - [ ] T106 [P] Add loading skeletons for all async data in lib/shared/widgets/skeleton_loader.dart
@@ -311,9 +313,11 @@ This task list has been updated to comply with all five NON-NEGOTIABLE principle
 
 ### Critical Path for MVP
 
-**MVP = US4 (Auth) + US1 (Status) + US2 (Control)**
+**MVP = US4 (Auth) + US1 (Status) + US2 (Control) + US3 (Temperature) + US6 (Events)**
 
 **Constitution Compliance**: All widget tests MUST be completed before corresponding UI tasks per Principle I (Test-First Development).
+
+**Scheduling (US5) is EXCLUDED from MVP** - deferred to post-V1.0 release due to complexity of cross-platform background execution.
 
 ```
 T001-T008 (Setup)
@@ -326,6 +330,10 @@ T036-T054 (US1: Status) ← REQUIRED FOR MVP (includes T044a, T045a, T050a widge
     ↓
 T055-T066 (US2: Control) ← REQUIRED FOR MVP (includes T062a widget test, T064a validation)
     ↓
+T067-T074 (US3: Temperature) ← REQUIRED FOR MVP (includes T069a widget test)
+    ↓
+T075-T088 (US6: Events) ← REQUIRED FOR MVP (includes T082a widget test)
+    ↓
 MVP COMPLETE ✅
 ```
 
@@ -336,7 +344,7 @@ MVP COMPLETE ✅
 - **US2 (Control - P2)**: Depends on US4 + US1 (needs auth + device state)
 - **US3 (Temperature - P3)**: Depends on US4 + US1 + US2 (extends control capability)
 - **US6 (Events - P3)**: Depends on US4 only - INDEPENDENT of US1/US2/US3 (can run parallel)
-- **US5 (Scheduling - P4)**: Depends on US4 + US2 (needs auth + control repository)
+- **US5 (Scheduling - P4)**: EXCLUDED FROM MVP - Depends on US4 + US2 (needs auth + control repository) - Deferred to V1.1+
 
 ### Parallel Opportunities
 
@@ -356,7 +364,7 @@ MVP COMPLETE ✅
 **Across User Stories** (if team has capacity):
 - After US4 completes: US1 and US6 can run in parallel
 - After US1 completes: US2 and continue US6 in parallel
-- After US2 completes: US3 and US5 can run in parallel (if US6 is also done)
+- After US2 completes: US3 can start (US6 continues in parallel if not done)
 
 ### Within Each User Story
 
@@ -402,7 +410,7 @@ T034 (Logout) + T035 (Error handling) ← final integration
 
 ## Implementation Strategy
 
-### MVP-First Approach
+### MVP-First Approach (Scheduling Excluded)
 
 **Week 1-2: Foundation + Auth + Status**
 - Complete Setup (T001-T008)
@@ -411,21 +419,22 @@ T034 (Logout) + T035 (Error handling) ← final integration
 - Complete US1 Status (T036-T055)
 - **Deliverable**: Users can log in and view real-time sauna status
 
-**Week 3: Control**
+**Week 3: Control + Temperature**
 - Complete US2 Power Control (T056-T066)
-- Start US3 Temperature (T067-T074)
-- **Deliverable**: Users can remotely control their sauna
+- Complete US3 Temperature (T067-T074)
+- **Deliverable**: Users can remotely control and adjust sauna temperature
 
-**Week 4: Enhancement**
-- Complete US3 Temperature (if not done)
+**Week 4: Events & Notifications**
 - Complete US6 Events (T075-T088)
-- Start US5 Scheduling (T089-T105)
-- **Deliverable**: Full-featured app with notifications
+- **Deliverable**: Full-featured MVP with real-time notifications
 
-**Week 5+: Polish & Release**
-- Complete US5 Scheduling (if not done)
-- Complete Polish (T106-T124)
-- **Deliverable**: Production-ready application
+**Week 5: Polish & V1.0 Release**
+- Complete Polish (T106-T122)
+- **Deliverable**: Production-ready V1.0 application
+
+**Post-V1.0: Scheduling & Service Discovery**
+- V1.1: Add US5 Scheduling (T089-T104)
+- V1.2: Add Runtime Service Discovery (T125-T134)
 
 ### Platform Parity Notes
 
@@ -462,23 +471,61 @@ After each phase, validate using the "Independent Test" criteria from spec.md:
 
 **Parallel Opportunities Identified**: 47+ tasks marked [P] can run in parallel with others in their phase
 
-**MVP Scope** (Recommended first release):
+**MVP Scope** (V1.0 Release - Scheduling Excluded):
 - Setup + Foundational: 22 tasks
 - US4 (Auth): 15 tasks (includes widget tests)
 - US1 (Status): 21 tasks (includes widget tests)
 - US2 (Control): 13 tasks (includes widget test + validation)
-- **MVP Total**: 71 tasks (increased from 66 to ensure constitution compliance)
-
-**Post-MVP Features**:
-- US3 (Temperature): 9 tasks
-- US6 (Events): 15 tasks
-- US5 (Scheduling): 18 tasks
+- US3 (Temperature): 9 tasks (includes widget test)
+- US6 (Events): 15 tasks (includes widget test)
 - Polish: 18 tasks
-- **Enhancement Total**: 60 tasks
+- **MVP Total**: 113 tasks
+
+**Post-MVP Features** (V1.1+):
+- US5 (Scheduling): 18 tasks - **DEFERRED** (complex cross-platform background execution)
+- Runtime Service Discovery: 10 tasks (T125-T134) - **DEFERRED**
+- **Enhancement Total**: 28 tasks
+
+---
+
+## Deferred Tasks (Future Enhancements)
+
+**Note**: These tasks implement runtime service discovery to fetch endpoints dynamically. Currently, endpoints are hardcoded in `api_constants.dart` with values discovered from https://prod.api.harvia.io/endpoints. This works reliably but requires app update if Harvia changes endpoints.
+
+### Phase 12: Runtime Service Discovery (Priority: P5 - Post-V1.0)
+
+**Goal**: Enable dynamic endpoint discovery at runtime for resilience to API endpoint changes
+
+**Independent Test**: App fetches endpoints from service discovery URL on startup, caches them, and uses discovered URLs for all API calls without requiring code changes.
+
+- [ ] T125 [P] Create EndpointConfig model in lib/core/config/endpoint_config.dart (stores REST/GraphQL/IoT endpoints)
+- [ ] T126 [P] Create service discovery API client in lib/services/api/service_discovery_client.dart (GET https://prod.api.harvia.io/endpoints)
+- [ ] T127 Create endpoint cache repository in lib/core/config/endpoint_repository.dart (Hive storage for discovered endpoints)
+- [ ] T128 Create endpoint provider in lib/core/config/endpoint_provider.dart (Riverpod provider with startup fetch + periodic refresh)
+- [ ] T129 Update REST client in lib/services/api/rest/rest_client.dart to use dynamic baseUrl from endpoint provider
+- [ ] T130 Update GraphQL client in lib/services/api/graphql/graphql_client.dart to use dynamic URLs from endpoint provider
+- [ ] T131 Add fallback logic to use hardcoded endpoints if service discovery fails
+- [ ] T132 Implement endpoint refresh on app startup and every 24 hours
+- [ ] T133 Add logging for endpoint changes and service discovery failures
+- [ ] T134 Create integration test for service discovery flow in test/integration/service_discovery_test.dart
+
+**Benefits**:
+- App automatically adapts to Harvia endpoint changes
+- No app updates required if only endpoints change
+- Fallback to hardcoded endpoints ensures reliability
+
+**Risks**:
+- Service discovery endpoint itself could change (mitigated by hardcoded fallback)
+- Network failures on startup could delay app launch (mitigated by cached endpoints)
+
+**Estimated Effort**: 2-3 days
 
 ---
 
 **Generated**: 2025-11-15  
+**Updated**: 2025-11-15 (added deferred tasks, excluded scheduling from MVP)  
 **Branch**: 001-sauna-controller-app  
 **Status**: Ready for implementation  
-**Next Step**: Begin with Phase 1 (Setup) tasks T001-T008
+**Current Progress**: 86/113 MVP tasks complete (76.1%)  
+**MVP Scope**: V1.0 = US4 + US1 + US2 + US3 + US6 + Polish (scheduling excluded)  
+**Next Step**: Complete Phase 7 (US6 Events) - T080-T088 remaining
