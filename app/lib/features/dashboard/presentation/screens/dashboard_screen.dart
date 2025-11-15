@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/layout_constants.dart';
-import '../../../../services/api/graphql/raw_graphql_test.dart';
+import '../../../map/presentation/screens/map_screen.dart';
 import '../providers/device_list_provider.dart';
 import '../widgets/device_status_card.dart';
 
@@ -35,9 +35,15 @@ class DashboardScreen extends ConsumerWidget {
         title: const Text('Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: () => testRawGraphQLQuery(),
-            tooltip: 'Test Raw GraphQL',
+            icon: const Icon(Icons.map),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => const MapScreen(),
+                ),
+              );
+            },
+            tooltip: 'View Map',
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
