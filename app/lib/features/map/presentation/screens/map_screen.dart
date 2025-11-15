@@ -12,6 +12,8 @@ import 'package:maplibre/maplibre.dart';
 import '../../../device/domain/entities/sauna_controller.dart';
 import '../../../dashboard/presentation/providers/device_list_provider.dart';
 
+enum MetricType { temperature, humidity, time }
+
 /// Fullscreen map screen showing device locations
 ///
 /// Displays a map with markers for all devices that have location data
@@ -26,17 +28,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   // Style + images ready
   bool _styleReady = false;
   MapController? _mapController;
+  StyleController? _styleController;
   // Cached feature lists so we can rebuild layers after style load
   List<Feature<Point>> _controllerPoints = [];
   List<Feature<Point>> _sensorPoints = [];
-  // Random weights map for each region id (4-10 inclusive)
-  late final Map<int, int> _regionWeights;
+  // Random weights maps for each metric type (8-20 inclusive)
+  late final Map<int, int> _temperatureWeights;
+  late final Map<int, int> _humidityWeights;
+  late final Map<int, int> _timeWeights;
+  // Current selected metric
+  MetricType _selectedMetric = MetricType.temperature;
+  // Track if style is loaded
+  bool _styleLoaded = false;
 
   @override
   void initState() {
     super.initState();
     developer.log('[Map] MapScreen initState', name: 'HarviaMSGA');
-    _regionWeights = _generateRandomWeights();
+    _temperatureWeights = _generateRandomWeights();
+    _humidityWeights = _generateRandomWeights();
+    _timeWeights = _generateRandomWeights();
   }
 
   /// Generate random weights (8-20 inclusive) for region IDs 0-335
@@ -53,6 +64,96 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     return weights;
   }
 
+  /// Build gradient expression for red (temperature)
+  List<dynamic> _buildRedGradient(Map<int, int> weights) {
+    return [
+      'interpolate',
+      ['linear'],
+      ['id'],
+      ...weights.entries.expand((entry) {
+        final id = entry.key;
+        final weight = entry.value;
+        final redValue = 255 - ((weight - 8) * 116 ~/ 12);
+        final greenBlueValue = 200 - ((weight - 8) * 200 ~/ 12);
+        final color =
+            '#${redValue.toRadixString(16).padLeft(2, '0')}${greenBlueValue.toRadixString(16).padLeft(2, '0')}${greenBlueValue.toRadixString(16).padLeft(2, '0')}';
+        return [id, color];
+      }).toList(),
+    ];
+  }
+
+  /// Build gradient expression for blue (humidity)
+  List<dynamic> _buildBlueGradient(Map<int, int> weights) {
+    return [
+      'interpolate',
+      ['linear'],
+      ['id'],
+      ...weights.entries.expand((entry) {
+        final id = entry.key;
+        final weight = entry.value;
+        final blueValue = 255 - ((weight - 8) * 116 ~/ 12);
+        final redGreenValue = 200 - ((weight - 8) * 200 ~/ 12);
+        final color =
+            '#${redGreenValue.toRadixString(16).padLeft(2, '0')}${redGreenValue.toRadixString(16).padLeft(2, '0')}${blueValue.toRadixString(16).padLeft(2, '0')}';
+        return [id, color];
+      }).toList(),
+    ];
+  }
+
+  /// Build gradient expression for green (time)
+  List<dynamic> _buildGreenGradient(Map<int, int> weights) {
+    return [
+      'interpolate',
+      ['linear'],
+      ['id'],
+      ...weights.entries.expand((entry) {
+        final id = entry.key;
+        final weight = entry.value;
+        final greenValue = 255 - ((weight - 8) * 116 ~/ 12);
+        final redBlueValue = 200 - ((weight - 8) * 200 ~/ 12);
+        final color =
+            '#${redBlueValue.toRadixString(16).padLeft(2, '0')}${greenValue.toRadixString(16).padLeft(2, '0')}${redBlueValue.toRadixString(16).padLeft(2, '0')}';
+        return [id, color];
+      }).toList(),
+    ];
+  }
+
+  /// Update the layer color based on selected metric
+  Future<void> _updateLayerColor(StyleController style) async {
+    try {
+      // Remove existing layer
+      await style.removeLayer('regions-layer');
+
+      // Build appropriate gradient based on selected metric
+      final gradientExpression = switch (_selectedMetric) {
+        MetricType.temperature => _buildRedGradient(_temperatureWeights),
+        MetricType.humidity => _buildBlueGradient(_humidityWeights),
+        MetricType.time => _buildGreenGradient(_timeWeights),
+      };
+
+      // Add layer with new color
+      await style.addLayer(
+        FillStyleLayer(
+          id: 'regions-layer',
+          sourceId: 'regions-source',
+          paint: {'fill-color': gradientExpression, 'fill-opacity': 0.5},
+        ),
+      );
+
+      developer.log(
+        '[Map] ✅ Updated layer color for metric: $_selectedMetric',
+        name: 'HarviaMSGA',
+      );
+    } catch (e, stack) {
+      developer.log(
+        '[Map] ❌ Error updating layer color',
+        name: 'HarviaMSGA',
+        error: e,
+        stackTrace: stack,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final deviceListAsync = ref.watch(deviceListProvider);
@@ -65,7 +166,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Device Locations'),
+        title: const Text('Löyly Atlas'),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -108,7 +209,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               MapLibreMap(
                 options: const MapOptions(
                   initCenter: Geographic(lon: 24.629913, lat: 60.156773),
-                  initZoom: 10.0,
+                  initZoom: 9.0,
                   initStyle: styleUrl,
                 ),
                 onMapCreated: (controller) {
@@ -119,6 +220,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   );
                 },
                 onStyleLoaded: (style) async {
+                  _styleController = style;
                   try {
                     // Fetch the remote GeoJSON data
                     const geoJsonUrl =
@@ -144,26 +246,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       name: 'HarviaMSGA',
                     );
 
-                    // Add the fill layer with red gradient based on weights
-                    // Build interpolate expression for red gradient
-                    final interpolateExpression = [
-                      'interpolate',
-                      ['linear'],
-                      ['id'],
-                      // Generate stops for each ID with its weight mapped to red intensity
-                      ..._regionWeights.entries.expand((entry) {
-                        final id = entry.key;
-                        final weight = entry.value;
-                        // Map weight 8-20 to red intensity (almost transparent to dark)
-                        // weight 8 = rgb(255, 200, 200) light/almost transparent red
-                        // weight 20 = rgb(139, 0, 0) dark red
-                        final redValue = 255 - ((weight - 8) * 116 ~/ 12);
-                        final greenBlueValue = 200 - ((weight - 8) * 200 ~/ 12);
-                        final color =
-                            '#${redValue.toRadixString(16).padLeft(2, '0')}${greenBlueValue.toRadixString(16).padLeft(2, '0')}${greenBlueValue.toRadixString(16).padLeft(2, '0')}';
-                        return [id, color];
-                      }).toList(),
-                    ];
+                    // Add the fill layer with temperature gradient (red)
+                    final interpolateExpression = _buildRedGradient(
+                      _temperatureWeights,
+                    );
 
                     await style.addLayer(
                       FillStyleLayer(
@@ -175,8 +261,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         },
                       ),
                     );
+
+                    setState(() {
+                      _styleLoaded = true;
+                    });
+
                     developer.log(
-                      '[Map] ✅ GeoJSON fill layer added with red gradient based on weights',
+                      '[Map] ✅ GeoJSON fill layer added with temperature gradient',
                       name: 'HarviaMSGA',
                     );
                   } catch (e, stack) {
@@ -229,7 +320,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         setState(() => _styleReady = true);
 
                         // Fit camera to show all markers
-                        _fitBoundsToMarkers();
+                        await _fitBoundsToMarkers();
                       }
                     } catch (e, stack) {
                       developer.log(
@@ -267,7 +358,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               // Map controls
               Positioned(
                 right: 16,
-                bottom: 100,
+                bottom: 110,
                 child: Column(
                   children: [
                     FloatingActionButton.small(
@@ -304,7 +395,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             lon: 24.629913,
                             lat: 60.156773,
                           ),
-                          zoom: 15.0,
+                          zoom: 14.0,
                         );
                       },
                       child: const Icon(Icons.my_location),
@@ -312,6 +403,66 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   ],
                 ),
               ),
+              // Metric selector at bottom
+              if (_styleLoaded)
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  right: 16,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _MetricButton(
+                        icon: Icons.thermostat,
+                        label: 'Temp',
+                        isSelected: _selectedMetric == MetricType.temperature,
+                        onTap: () async {
+                          if (_selectedMetric != MetricType.temperature) {
+                            setState(() {
+                              _selectedMetric = MetricType.temperature;
+                            });
+                            final style = _styleController;
+                            if (style != null) {
+                              await _updateLayerColor(style);
+                            }
+                          }
+                        },
+                      ),
+                      _MetricButton(
+                        icon: Icons.water_drop,
+                        label: 'Humidity',
+                        isSelected: _selectedMetric == MetricType.humidity,
+                        onTap: () async {
+                          if (_selectedMetric != MetricType.humidity) {
+                            setState(() {
+                              _selectedMetric = MetricType.humidity;
+                            });
+                            final style = _styleController;
+                            if (style != null) {
+                              await _updateLayerColor(style);
+                            }
+                          }
+                        },
+                      ),
+                      _MetricButton(
+                        icon: Icons.access_time,
+                        label: 'Time',
+                        isSelected: _selectedMetric == MetricType.time,
+                        onTap: () async {
+                          if (_selectedMetric != MetricType.time) {
+                            setState(() {
+                              _selectedMetric = MetricType.time;
+                            });
+                            final style = _styleController;
+                            if (style != null) {
+                              await _updateLayerColor(style);
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
             ],
           );
         },
@@ -440,15 +591,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final maxDiff = lonDiff > latDiff ? lonDiff : latDiff;
 
     // Rough zoom calculation (lower zoom = more area visible)
-    double zoom = 10.0;
+    double zoom = 9.0;
     if (maxDiff > 10) {
-      zoom = 5.0;
+      zoom = 4.0;
     } else if (maxDiff > 5) {
-      zoom = 6.0;
+      zoom = 5.0;
     } else if (maxDiff > 2) {
-      zoom = 7.0;
+      zoom = 6.0;
     } else if (maxDiff > 1) {
-      zoom = 8.0;
+      zoom = 7.0;
     }
 
     developer.log(
@@ -461,6 +612,54 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     await _mapController!.animateCamera(
       center: Geographic(lon: centerLon, lat: centerLat),
       zoom: zoom,
+    );
+  }
+}
+
+/// Button widget for metric selection
+class _MetricButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _MetricButton({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? Colors.white : Colors.grey[600],
+              size: 28,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.grey[600],
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
