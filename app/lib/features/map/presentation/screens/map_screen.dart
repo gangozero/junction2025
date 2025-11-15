@@ -4,6 +4,7 @@ library;
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre/maplibre.dart';
 
@@ -98,6 +99,65 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     '[Map] MapLibreMap created',
                     name: 'HarviaMSGA',
                   );
+                },
+                onStyleLoaded: (style) async {
+                  try {
+                    // Fetch the remote GeoJSON data
+                    const geoJsonUrl =
+                        'https://raw.githubusercontent.com/varmais/maakunnat/refs/heads/master/kunnat.geojson';
+                    final response = await http.get(Uri.parse(geoJsonUrl));
+                    if (response.statusCode != 200) {
+                      throw Exception(
+                        'Failed to load GeoJSON: ${response.statusCode}',
+                      );
+                    }
+                    final geoJsonData = response.body;
+                    developer.log(
+                      '[Map] ✅ GeoJSON fetched successfully',
+                      name: 'HarviaMSGA',
+                    );
+
+                    // Add the GeoJSON source
+                    await style.addSource(
+                      GeoJsonSource(id: 'regions-source', data: geoJsonData),
+                    );
+                    developer.log(
+                      '[Map] ✅ GeoJSON source added',
+                      name: 'HarviaMSGA',
+                    );
+
+                    // Add the fill layer - blue for all, red for id=52
+                    await style.addLayer(
+                      FillStyleLayer(
+                        id: 'regions-layer',
+                        sourceId: 'regions-source',
+                        paint: {
+                          'fill-color': [
+                            'case',
+                            [
+                              '==',
+                              ['id'],
+                              52,
+                            ],
+                            '#FF0000', // Red for id=52
+                            '#0000FF', // Blue for all others
+                          ],
+                          'fill-opacity': 0.5,
+                        },
+                      ),
+                    );
+                    developer.log(
+                      '[Map] ✅ GeoJSON fill layer added - id 52 in red, others in blue',
+                      name: 'HarviaMSGA',
+                    );
+                  } catch (e, stack) {
+                    developer.log(
+                      '[Map] ❌ Error adding GeoJSON layer',
+                      name: 'HarviaMSGA',
+                      error: e,
+                      stackTrace: stack,
+                    );
+                  }
                 },
                 onEvent: (event) async {
                   developer.log(
