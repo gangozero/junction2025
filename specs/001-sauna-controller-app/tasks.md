@@ -13,6 +13,21 @@
 
 ---
 
+## ⚠️ WORKFLOW INSTRUCTIONS
+
+**When completing tasks**:
+1. ✅ Mark task as complete in this file immediately after finishing implementation
+2. 🔄 Commit the updated tasks.md file
+3. 📊 Provide brief progress update when completing major milestones (phase completion, checkpoints)
+
+**Task progression**:
+- Work through tasks sequentially within each phase unless marked `[P]` (parallel)
+- Tasks marked `[P]` can be implemented in any order within their group
+- Do NOT skip ahead to next phase until current phase checkpoint is reached
+- Update this file after EVERY completed task to maintain accurate progress tracking
+
+---
+
 ## Format: `- [ ] [ID] [P?] [Story?] Description`
 
 - **Checkbox**: `- [ ]` for tracking completion
@@ -26,14 +41,14 @@
 
 **Purpose**: Initialize Flutter project with all platforms and dependencies
 
-- [ ] T001 Create Flutter project structure with web support enabled using `flutter create --platforms=ios,android,web harvia_msga`
-- [ ] T002 Configure pubspec.yaml with dependencies (riverpod 2.4+, graphql_flutter 5.1+, hive 2.2+, dio 5.4+, flutter_secure_storage 9.0+, flutter_local_notifications 16.0+, workmanager 0.5+)
-- [ ] T003 [P] Setup iOS configuration in ios/Runner/Info.plist (background modes, notification permissions, network permissions)
-- [ ] T004 [P] Setup Android configuration in android/app/src/main/AndroidManifest.xml (permissions, workmanager, notification channels)
-- [ ] T005 [P] Setup web configuration in web/index.html and web/manifest.json (PWA settings, service worker registration)
-- [ ] T006 [P] Create project directory structure per plan.md (lib/core/, lib/features/, lib/services/, lib/shared/)
-- [ ] T007 [P] Configure analysis_options.yaml with strict linting rules for Flutter/Dart
-- [ ] T008 Create lib/core/constants/api_constants.dart with Harvia API endpoint configuration
+- [x] T001 Create Flutter project structure with web support enabled using `flutter create --platforms=ios,android,web harvia_msga`
+- [x] T002 Configure pubspec.yaml with dependencies (riverpod 2.4+, graphql_flutter 5.1+, hive 2.2+, dio 5.4+, flutter_secure_storage 9.0+, flutter_local_notifications 16.0+, workmanager 0.5+)
+- [x] T003 [P] Setup iOS configuration in ios/Runner/Info.plist (background modes, notification permissions, network permissions)
+- [x] T004 [P] Setup Android configuration in android/app/src/main/AndroidManifest.xml (permissions, workmanager, notification channels)
+- [x] T005 [P] Setup web configuration in web/index.html and web/manifest.json (PWA settings, service worker registration)
+- [x] T006 [P] Create project directory structure per plan.md (lib/core/, lib/features/, lib/services/, lib/shared/)
+- [x] T007 [P] Configure analysis_options.yaml with strict linting rules for Flutter/Dart
+- [x] T008 Create lib/core/constants/api_constants.dart with Harvia API endpoint configuration
 
 ---
 
@@ -43,20 +58,20 @@
 
 **⚠️ CRITICAL**: All user stories depend on this phase - must complete before story work begins
 
-- [ ] T009 Create error handling framework in lib/core/error/failures.dart (NetworkFailure, AuthFailure, ApiFailure, CacheFailure classes)
-- [ ] T010 [P] Create logging utility in lib/core/utils/logger.dart with platform-specific implementations
-- [ ] T011 [P] Setup Hive initialization and encryption in lib/services/storage/hive_service.dart
-- [ ] T012 [P] Setup platform-specific secure storage wrapper in lib/services/storage/secure_storage_service.dart (flutter_secure_storage for mobile, encrypted IndexedDB for web)
-- [ ] T013 Create GraphQL client configuration in lib/services/api/graphql/graphql_client.dart with WebSocket support and auto-reconnection
-- [ ] T014 [P] Create REST API client in lib/services/api/rest/rest_client.dart using dio with interceptors
-- [ ] T015 Create base repository pattern in lib/core/data/base_repository.dart with error handling and offline-first strategy
-- [ ] T016 [P] Create app theme configuration in lib/core/theme/app_theme.dart with responsive breakpoints for web
-- [ ] T017 [P] Setup responsive layout utilities in lib/core/utils/responsive.dart (mobile, tablet, desktop breakpoints)
-- [ ] T018 [P] Create platform detection utility in lib/core/utils/platform_utils.dart (mobile vs web feature flags)
-- [ ] T019 [P] Setup notification service wrapper in lib/services/notifications/notification_service.dart (flutter_local_notifications for mobile, browser notifications with permission handling for web)
-- [ ] T020 [P] Setup background task service in lib/services/background/background_service.dart (workmanager for mobile, service worker for web)
-- [ ] T021 Create navigation/routing configuration in lib/core/router/app_router.dart using Flutter navigation 2.0
-- [ ] T022 Create shared widget components in lib/shared/widgets/ (loading_indicator.dart, error_display.dart, responsive_layout.dart)
+- [x] T009 Create error handling framework in lib/core/error/failures.dart (NetworkFailure, AuthFailure, ApiFailure, CacheFailure classes)
+- [x] T010 [P] Create logging utility in lib/core/utils/logger.dart with platform-specific implementations
+- [x] T011 [P] Setup Hive initialization and encryption in lib/services/storage/hive_service.dart
+- [x] T012 [P] Setup platform-specific secure storage wrapper in lib/services/storage/secure_storage_service.dart (flutter_secure_storage for mobile, encrypted IndexedDB for web)
+- [x] T013 Create GraphQL client configuration in lib/services/api/graphql/graphql_client.dart with WebSocket support and auto-reconnection
+- [x] T014 [P] Create REST API client in lib/services/api/rest/rest_client.dart using dio with interceptors
+- [x] T015 Create base repository pattern in lib/core/data/base_repository.dart with error handling and offline-first strategy
+- [x] T016 [P] Create app theme configuration in lib/core/theme/app_theme.dart with responsive breakpoints for web
+- [x] T017 [P] Setup responsive layout utilities in lib/core/utils/responsive.dart (mobile, tablet, desktop breakpoints)
+- [x] T018 [P] Create platform detection utility in lib/core/utils/platform_utils.dart (mobile vs web feature flags)
+- [x] T019 [P] Setup notification service wrapper in lib/services/notifications/notification_service.dart (flutter_local_notifications for mobile, browser notifications with permission handling for web)
+- [x] T020 [P] Setup background task service in lib/services/background/background_service.dart (workmanager for mobile, service worker for web)
+- [x] T021 Create navigation/routing configuration in lib/core/router/app_router.dart using Flutter navigation 2.0
+- [x] T022 Create shared widget components in lib/shared/widgets/ (loading_indicator.dart, error_display.dart, responsive_layout.dart)
 
 **Checkpoint**: ✅ Foundation complete - user story implementation can now begin in parallel
 
