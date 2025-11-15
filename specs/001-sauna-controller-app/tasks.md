@@ -111,26 +111,26 @@
 
 ### Implementation for US1
 
-- [ ] T036 [P] [US1] Create SaunaController entity in lib/features/device/domain/entities/sauna_controller.dart with enums (PowerState, HeatingStatus, ConnectionStatus)
-- [ ] T037 [P] [US1] Create SensorDevice entity in lib/features/device/domain/entities/sensor_device.dart
-- [ ] T038 [P] [US1] Create device DTOs in lib/features/device/data/models/ (device_dto.dart, sensor_dto.dart mapping from GraphQL responses)
-- [ ] T039 [US1] Create device repository interface in lib/features/device/domain/repositories/device_repository.dart
-- [ ] T040 [US1] Implement GraphQL device data source in lib/features/device/data/datasources/device_remote_datasource.dart (listDevices query, getDeviceState query, onDeviceStateChange subscription)
-- [ ] T041 [US1] Implement device cache data source in lib/features/device/data/datasources/device_local_datasource.dart using Hive
-- [ ] T042 [US1] Implement device repository in lib/features/device/data/repositories/device_repository_impl.dart with cache-first offline strategy
-- [ ] T043 [US1] Create device list state provider in lib/features/dashboard/presentation/providers/device_list_provider.dart
-- [ ] T044 [US1] Create device state stream provider in lib/features/dashboard/presentation/providers/device_state_provider.dart for WebSocket subscriptions
-- [ ] T045 [US1] Create dashboard screen in lib/features/dashboard/presentation/screens/dashboard_screen.dart with responsive layout (mobile: single column, web: multi-column grid)
-- [ ] T046 [P] [US1] Create device status card widget in lib/features/dashboard/presentation/widgets/device_status_card.dart
-- [ ] T047 [P] [US1] Create temperature display widget in lib/features/dashboard/presentation/widgets/temperature_display.dart with progress indicator
-- [ ] T048 [P] [US1] Create humidity display widget (conditional) in lib/features/dashboard/presentation/widgets/humidity_display.dart
-- [ ] T049 [P] [US1] Create heating status indicator in lib/features/dashboard/presentation/widgets/heating_status.dart
-- [ ] T050 [US1] Implement GraphQL sensor data source in lib/features/device/data/datasources/sensor_remote_datasource.dart (getLatestData query, onSensorData subscription)
-- [ ] T051 [US1] Implement automatic sensor-controller association logic in lib/features/device/domain/usecases/associate_sensors_usecase.dart
-- [ ] T052 [US1] Add manual sensor linking UI in lib/features/device/presentation/widgets/sensor_link_dialog.dart
-- [ ] T053 [US1] Implement pull-to-refresh for manual status updates
-- [ ] T054 [US1] Add connection status indicators and offline mode handling
-- [ ] T055 [US1] Implement WebSocket reconnection logic with exponential backoff
+- [x] T036 [P] [US1] Create SaunaController entity in lib/features/device/domain/entities/sauna_controller.dart with enums (PowerState, HeatingStatus, ConnectionStatus)
+- [x] T037 [P] [US1] Create SensorDevice entity in lib/features/device/domain/entities/sensor_device.dart
+- [x] T038 [P] [US1] Create device DTOs in lib/features/device/data/models/ (device_dto.dart, sensor_dto.dart mapping from GraphQL responses)
+- [x] T039 [US1] Create device repository interface in lib/features/device/domain/repositories/device_repository.dart
+- [x] T040 [US1] Implement GraphQL device data source in lib/features/device/data/datasources/device_remote_datasource.dart (listDevices query, getDeviceState query, onDeviceStateChange subscription)
+- [x] T041 [US1] Implement device cache data source in lib/features/device/data/datasources/device_local_datasource.dart using Hive
+- [x] T042 [US1] Implement device repository in lib/features/device/data/repositories/device_repository_impl.dart with cache-first offline strategy
+- [x] T043 [US1] Create device list state provider in lib/features/dashboard/presentation/providers/device_list_provider.dart
+- [x] T044 [US1] Create device state stream provider in lib/features/dashboard/presentation/providers/device_state_provider.dart for WebSocket subscriptions
+- [x] T045 [US1] Create dashboard screen in lib/features/dashboard/presentation/screens/dashboard_screen.dart with responsive layout (mobile: single column, web: multi-column grid)
+- [x] T046 [P] [US1] Create device status card widget in lib/features/dashboard/presentation/widgets/device_status_card.dart
+- [x] T047 [P] [US1] Create temperature display widget in lib/features/dashboard/presentation/widgets/temperature_display.dart with progress indicator
+- [x] T048 [P] [US1] Create humidity display widget (conditional) in lib/features/dashboard/presentation/widgets/humidity_display.dart
+- [x] T049 [P] [US1] Create heating status indicator in lib/features/dashboard/presentation/widgets/heating_status.dart
+- [x] T050 [US1] Implement GraphQL sensor data source in lib/features/device/data/datasources/sensor_remote_datasource.dart (getLatestData query, onSensorData subscription)
+- [x] T051 [US1] Implement automatic sensor-controller association logic in lib/features/device/domain/usecases/associate_sensors_usecase.dart
+- [x] T052 [US1] Add manual sensor linking UI in lib/features/device/presentation/widgets/sensor_link_dialog.dart
+- [x] T053 [US1] Implement pull-to-refresh for manual status updates
+- [x] T054 [US1] Add connection status indicators and offline mode handling
+- [x] T055 [US1] Implement WebSocket reconnection logic with exponential backoff
 
 **Checkpoint**: ✅ Status monitoring complete - users can view real-time sauna state with sensors
 

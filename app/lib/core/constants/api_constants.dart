@@ -77,6 +77,9 @@ class ApiConstants {
   /// WebSocket reconnection delay (milliseconds)
   static const int wsReconnectDelay = 5000; // 5 seconds
 
+  /// WebSocket maximum reconnection delay (seconds)
+  static const int wsMaxReconnectDelay = 30; // 30 seconds
+
   /// Maximum reconnection attempts
   static const int maxReconnectAttempts = 5;
 
