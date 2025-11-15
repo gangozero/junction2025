@@ -6,6 +6,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import '../../domain/entities/command_request.dart';
 import '../models/command_response_dto.dart';
 import '../models/power_command_dto.dart';
+import '../../../../services/api/graphql/graphql_client.dart';
 
 /// Control remote data source
 ///
@@ -14,6 +15,13 @@ class ControlRemoteDataSource {
   final GraphQLClient client;
 
   const ControlRemoteDataSource({required this.client});
+
+  /// Default constructor using GraphQLClientService
+  factory ControlRemoteDataSource.create() {
+    return ControlRemoteDataSource(
+      client: GraphQLClientService.getClient() as GraphQLClient,
+    );
+  }
 
   /// Send device command mutation
   Future<CommandResponseDto> sendDeviceCommand({

@@ -7,11 +7,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-// Note: Import paths will be valid after T056-T062 implementation
-// import 'package:harvia_msga/features/control/presentation/widgets/power_control.dart';
-// import 'package:harvia_msga/features/control/presentation/providers/control_provider.dart';
-// import 'package:harvia_msga/features/device/domain/entities/sauna_controller.dart';
+import 'package:harvia_msga/features/control/presentation/widgets/power_control.dart';
+import 'package:harvia_msga/features/control/presentation/providers/control_provider.dart';
+import 'package:harvia_msga/features/device/domain/entities/sauna_controller.dart';
 
 void main() {
   group('PowerControl Widget Tests (TDD - Pre-Implementation)', () {

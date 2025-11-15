@@ -178,13 +178,13 @@ This task list has been updated to comply with all five NON-NEGOTIABLE principle
 - [x] T059 [US2] Implement GraphQL control data source in lib/features/control/data/datasources/control_remote_datasource.dart (sendDeviceCommand mutation for power on/off)
 - [x] T060 [US2] Implement control repository in lib/features/control/data/repositories/control_repository_impl.dart with retry logic
 - [x] T061 [US2] Create command queue for offline operation in lib/features/control/data/datasources/control_local_datasource.dart using Hive
-- [ ] T062 [US2] Create control state provider in lib/features/control/presentation/providers/control_provider.dart
+- [x] T062 [US2] Create control state provider in lib/features/control/presentation/providers/control_provider.dart
 - [x] T062a [US2] Create widget test file test/widget/control/power_control_test.dart with test cases for on/off states, loading states, offline prevention (REQUIRED before T063)
-- [ ] T063 [US2] Create power control widget in lib/features/control/presentation/widgets/power_control.dart with loading states
-- [ ] T064 [US2] Add command confirmation feedback (success/error snackbars)
-- [ ] T064a [US2] Create command validation use case in lib/features/control/domain/usecases/validate_command_usecase.dart to prevent conflicting commands (temp adjust when off, duplicate commands in-flight)
-- [ ] T065 [US2] Implement optimistic UI updates (show expected state immediately, rollback on failure)
-- [ ] T066 [US2] Add validation to prevent commands when sauna is offline (integrates T064a validation)
+- [x] T063 [US2] Create power control widget in lib/features/control/presentation/widgets/power_control.dart with loading states
+- [x] T064 [US2] Add command confirmation feedback (success/error snackbars)
+- [x] T064a [US2] Create command validation use case in lib/features/control/domain/usecases/validate_command_usecase.dart to prevent conflicting commands (temp adjust when off, duplicate commands in-flight)
+- [x] T065 [US2] Implement optimistic UI updates (show expected state immediately, rollback on failure)
+- [x] T066 [US2] Add validation to prevent commands when sauna is offline (integrates T064a validation)
 
 **Checkpoint**: ✅ Remote control complete - users can power sauna on/off remotely
 
@@ -198,15 +198,15 @@ This task list has been updated to comply with all five NON-NEGOTIABLE principle
 
 ### Implementation for US3
 
-- [ ] T067 [P] [US3] Create temperature command DTO in lib/features/control/data/models/temperature_command_dto.dart
-- [ ] T068 [US3] Add temperature mutation to control data source in lib/features/control/data/datasources/control_remote_datasource.dart
-- [ ] T069 [US3] Create temperature validation use case in lib/features/control/domain/usecases/validate_temperature_usecase.dart (check model-specific safe ranges from device entity modelNumber property)
-- [ ] T069a [US3] Create widget test file test/widget/control/temperature_control_test.dart with test cases for slider input, validation errors, range limits (REQUIRED before T070)
-- [ ] T070 [US3] Create temperature control widget in lib/features/control/presentation/widgets/temperature_control.dart (slider + input field)
-- [ ] T071 [US3] Add temperature range validation UI with warning dialogs
-- [ ] T072 [US3] Show estimated time to reach target temperature calculation
-- [ ] T073 [US3] Prevent temperature adjustment when sauna is powered off
-- [ ] T074 [US3] Add temperature presets for common settings (60°C, 70°C, 80°C, 90°C)
+- [x] T067 [P] [US3] Create temperature command DTO in lib/features/control/data/models/temperature_command_dto.dart
+- [x] T068 [US3] Add temperature mutation to control data source in lib/features/control/data/datasources/control_remote_datasource.dart
+- [x] T069 [US3] Create temperature validation use case in lib/features/control/domain/usecases/validate_temperature_usecase.dart (check model-specific safe ranges from device entity modelNumber property)
+- [x] T069a [US3] Create widget test file test/widget/control/temperature_control_test.dart with test cases for slider input, validation errors, range limits (REQUIRED before T070)
+- [x] T070 [US3] Create temperature control widget in lib/features/control/presentation/widgets/temperature_control.dart (slider + input field)
+- [x] T071 [US3] Add temperature range validation UI with warning dialogs
+- [x] T072 [US3] Show estimated time to reach target temperature calculation
+- [x] T073 [US3] Prevent temperature adjustment when sauna is powered off
+- [x] T074 [US3] Add temperature presets for common settings (60°C, 70°C, 80°C, 90°C)
 
 **Checkpoint**: ✅ Temperature control complete - users can safely adjust sauna temperature
 
@@ -220,11 +220,11 @@ This task list has been updated to comply with all five NON-NEGOTIABLE principle
 
 ### Implementation for US6
 
-- [ ] T075 [P] [US6] Create Event entity in lib/features/events/domain/entities/event.dart with enums (EventType, Severity)
-- [ ] T076 [P] [US6] Create event DTOs in lib/features/events/data/models/ (event_dto.dart mapping from GraphQL)
-- [ ] T077 [US6] Create events repository interface in lib/features/events/domain/repositories/events_repository.dart
-- [ ] T078 [US6] Implement GraphQL events data source in lib/features/events/data/datasources/events_remote_datasource.dart (listEvents query with filters, onEvent subscription)
-- [ ] T079 [US6] Implement events cache in lib/features/events/data/datasources/events_local_datasource.dart with ring buffer (max 1000 events) using Hive
+- [x] T075 [P] [US6] Create Event entity in lib/features/events/domain/entities/event.dart with enums (EventType, Severity)
+- [x] T076 [P] [US6] Create event DTOs in lib/features/events/data/models/ (event_dto.dart mapping from GraphQL)
+- [x] T077 [US6] Create events repository interface in lib/features/events/domain/repositories/events_repository.dart
+- [x] T078 [US6] Create GraphQL events data source in lib/features/events/data/datasources/events_remote_datasource.dart (listEvents query with filters, onEvent subscription)
+- [x] T079 [US6] Implement events cache in lib/features/events/data/datasources/events_local_datasource.dart with ring buffer (max 1000 events) using Hive
 - [ ] T080 [US6] Implement events repository in lib/features/events/data/repositories/events_repository_impl.dart
 - [ ] T081 [US6] Create event stream provider in lib/features/events/presentation/providers/events_provider.dart for WebSocket subscriptions
 - [ ] T082 [US6] Implement platform-specific notification dispatcher in lib/services/notifications/event_notification_handler.dart (mobile: flutter_local_notifications, web: browser notifications with permission request + in-app fallback)

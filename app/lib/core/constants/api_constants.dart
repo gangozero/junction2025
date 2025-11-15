@@ -2,6 +2,10 @@
 ///
 /// Defines all endpoint URLs, configuration values, and constants
 /// for connecting to the Harvia Cloud API services.
+///
+/// **IMPORTANT**: Endpoints are discovered dynamically at runtime via
+/// https://prod.api.harvia.io/endpoints service discovery endpoint.
+/// These constants serve as fallbacks and documentation.
 library;
 
 /// Base URLs for Harvia Cloud API
@@ -9,31 +13,146 @@ class ApiConstants {
   ApiConstants._();
 
   // ============================================================================
+  // SERVICE DISCOVERY
+  // ============================================================================
+
+  /// Service discovery endpoint (always fetched first)
+  /// Returns current REST, GraphQL, and IoT endpoints
+  static const String serviceDiscoveryUrl =
+      'https://prod.api.harvia.io/endpoints';
+
+  // ============================================================================
   // ENVIRONMENT CONFIGURATION
   // ============================================================================
 
   /// Current environment (production, staging, development)
-  /// TODO: Configure based on build flavor
   static const String environment = 'production';
+
+  /// AWS Region
+  static const String awsRegion = 'eu-central-1';
+
+  /// Cognito User Pool ID
+  static const String cognitoUserPoolId = 'eu-central-1_PYox3qeLn';
+
+  /// Cognito Identity Pool ID
+  static const String cognitoIdentityPoolId =
+      'eu-central-1:c6b64717-a29e-4695-8ce4-97c93470da8a';
 
   /// Enable debug logging for API calls
   static const bool enableApiLogging = true;
 
   // ============================================================================
-  // BASE URLS
+  // REST API BASE URLS (fetched from service discovery)
   // ============================================================================
 
-  /// Base URL for REST API (Authentication)
-  /// Used for: /auth/token, /auth/refresh, /auth/revoke
-  static const String restBaseUrl = 'https://api.harvia.cloud';
+  /// REST API - Generics (Authentication & Users)
+  /// Used for: authentication, user management, generic operations
+  static const String restGenericsBaseUrl =
+      'https://zft3sdx910.execute-api.eu-central-1.amazonaws.com/prod';
 
-  /// Base URL for GraphQL API (Device/Data/Events services)
-  /// Used for: queries, mutations, subscriptions
-  static const String graphqlBaseUrl = 'https://graphql.harvia.cloud';
+  /// REST API - Device (Controller Configuration & Shadow State)
+  /// Used for: device configuration, shadow state, device management
+  static const String restDeviceBaseUrl =
+      'https://ap754v98f8.execute-api.eu-central-1.amazonaws.com/prod';
 
-  /// WebSocket URL for GraphQL subscriptions
-  /// Used for: real-time device state, sensor data, events
-  static const String graphqlWsUrl = 'wss://graphql.harvia.cloud';
+  /// REST API - Data (Latest State & Events)
+  /// Used for: latest sensor data, device state, events
+  static const String restDataBaseUrl =
+      'https://u4830dkpl0.execute-api.eu-central-1.amazonaws.com/prod';
+
+  /// REST API - Users
+  /// Used for: user profile, preferences, settings
+  static const String restUsersBaseUrl =
+      'https://c3jzg90xli.execute-api.eu-central-1.amazonaws.com/prod';
+
+  // ============================================================================
+  // GRAPHQL ENDPOINTS (fetched from service discovery)
+  // ============================================================================
+
+  /// GraphQL - Data Service (Sensor Data & State)
+  /// HTTPS endpoint for queries/mutations
+  static const String graphqlDataHttpUrl =
+      'https://b6ypjrrojzfuleunmrsysp7aya.appsync-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Data Service (Sensor Data & State)
+  /// WebSocket endpoint for real-time subscriptions
+  static const String graphqlDataWsUrl =
+      'wss://b6ypjrrojzfuleunmrsysp7aya.appsync-realtime-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Device Service (Controller Config & Commands)
+  /// HTTPS endpoint for queries/mutations
+  static const String graphqlDeviceHttpUrl =
+      'https://6lhlukqhbzefnhad2qdyg2lffm.appsync-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Device Service (Controller Config & Commands)
+  /// WebSocket endpoint for real-time subscriptions
+  static const String graphqlDeviceWsUrl =
+      'wss://6lhlukqhbzefnhad2qdyg2lffm.appsync-realtime-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Events Service (Event History & Notifications)
+  /// HTTPS endpoint for queries/mutations
+  static const String graphqlEventsHttpUrl =
+      'https://ykn3dsmrrvc47lnzh5vowxevb4.appsync-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Events Service (Event History & Notifications)
+  /// WebSocket endpoint for real-time subscriptions
+  static const String graphqlEventsWsUrl =
+      'wss://ykn3dsmrrvc47lnzh5vowxevb4.appsync-realtime-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Users Service (User Profiles & Preferences)
+  /// HTTPS endpoint for queries/mutations
+  static const String graphqlUsersHttpUrl =
+      'https://qizruaso4naexbnzmmp2cokenq.appsync-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Users Service (User Profiles & Preferences)
+  /// WebSocket endpoint for real-time subscriptions
+  static const String graphqlUsersWsUrl =
+      'wss://qizruaso4naexbnzmmp2cokenq.appsync-realtime-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Stats Service (Analytics & Statistics)
+  /// HTTPS endpoint for queries/mutations
+  static const String graphqlStatsHttpUrl =
+      'https://2y6n4pgr6nbmddojwqrsrxhfnq.appsync-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Stats Service (Analytics & Statistics)
+  /// WebSocket endpoint for real-time subscriptions
+  static const String graphqlStatsWsUrl =
+      'wss://2y6n4pgr6nbmddojwqrsrxhfnq.appsync-realtime-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Payment Service (Subscriptions & Purchases)
+  /// HTTPS endpoint for queries/mutations
+  static const String graphqlPaymentHttpUrl =
+      'https://2bmloen445dojlgqfnw7b4kabu.appsync-api.eu-central-1.amazonaws.com/graphql';
+
+  /// GraphQL - Payment Service (Subscriptions & Purchases)
+  /// WebSocket endpoint for real-time subscriptions
+  static const String graphqlPaymentWsUrl =
+      'wss://2bmloen445dojlgqfnw7b4kabu.appsync-realtime-api.eu-central-1.amazonaws.com/graphql';
+
+  // ============================================================================
+  // IOT CORE CONFIGURATION
+  // ============================================================================
+
+  /// AWS IoT Core endpoint for device telemetry
+  static const String iotCoreEndpoint =
+      'ab4fm8yv2cf3g-ats.iot.eu-central-1.amazonaws.com';
+
+  /// IoT Core credentials endpoint
+  static const String iotCoreCredentialsEndpoint =
+      'c9d0zb4dt5fpm.credentials.iot.eu-central-1.amazonaws.com';
+
+  // ============================================================================
+  // DEPRECATED - Legacy Base URLs (kept for reference, use service-specific URLs above)
+  // ============================================================================
+
+  /// @deprecated Use service-specific REST URLs instead
+  static const String restBaseUrl = restGenericsBaseUrl;
+
+  /// @deprecated Use graphqlDeviceHttpUrl or graphqlDataHttpUrl instead
+  static const String graphqlBaseUrl = graphqlDeviceHttpUrl;
+
+  /// @deprecated Use graphqlDeviceWsUrl or graphqlDataWsUrl instead
+  static const String graphqlWsUrl = graphqlDeviceWsUrl;
 
   // ============================================================================
   // REST ENDPOINTS (Authentication Service)

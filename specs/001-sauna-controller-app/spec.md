@@ -9,6 +9,7 @@
 
 ### Session 2025-11-15
 
+- Q: How should endpoint URLs be configured and discovered? → A: Runtime service discovery (fetch from https://prod.api.harvia.io/endpoints on startup, cache endpoints, separate REST/GraphQL services by function: generics for auth, device for controller config/shadow, data for state/events, with distinct HTTPS and WebSocket URLs per service)
 - Q: How should the app handle the relationship between controllers and sensors? → A: Support both integrated and standalone sensors (flexible architecture for different hardware configs)
 - Q: How should the app receive real-time status updates? → A: GraphQL subscriptions for live updates (WebSocket push notifications, instant updates)
 - Q: Should the app support humidity monitoring and control? → A: Display humidity when available, no control (monitor-only for sensors that support it)
