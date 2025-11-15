@@ -1,0 +1,1 @@
+A cross-platform Flutter application build with GitHub Copilot using SpecKit. All detail in app folder.
