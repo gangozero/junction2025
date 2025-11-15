@@ -258,6 +258,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // In production, parse latitude/longitude from device attributes
 
     // Mock locations in Finland area (lon, lat order)
+    // One controller (fd1d00ba) and one sensor (66db1620) near Helsinki center for testing
     final mockLocations = {
       'a510367c-a839-4216-86a7-5a85d57e5219': const Geographic(
         lon: 24.9384,
@@ -271,9 +272,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         lon: 23.7610,
         lat: 61.4978,
       ),
+      // Sensor near Helsinki center (60.156773, 24.629913)
       '66db1620-014b-4575-a4cc-e11e0de27d14': const Geographic(
-        lon: 22.2666,
-        lat: 60.4518,
+        lon: 24.630500,
+        lat: 60.157200,
       ),
       'febb62d5-55f4-49cd-b481-93638a0ae41d': const Geographic(
         lon: 25.4651,
@@ -287,9 +289,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         lon: 24.9384,
         lat: 60.1699,
       ),
+      // Controller near Helsinki center (60.156773, 24.629913)
       'fd1d00ba-ac1d-4340-8c81-8ef2e55780b3': const Geographic(
-        lon: 24.7942,
-        lat: 60.1809,
+        lon: 24.630500,
+        lat: 60.157200,
       ),
       '5581823b-d353-40c2-9498-1c1b879b5061': const Geographic(
         lon: 28.1887,
