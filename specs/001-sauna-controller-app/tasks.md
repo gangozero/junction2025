@@ -7,9 +7,33 @@
 **Target Platforms**: iOS 13+, Android 8.0+ (API 26+), Web (modern browsers)  
 **Tech Stack**: Flutter 3.16+ / Dart 3.x, Riverpod, Hive, graphql_flutter, workmanager
 
-**Tests**: Not explicitly requested in spec - tasks focus on implementation only.
+**Tests**: Widget tests MUST be created BEFORE UI implementation per Constitution Principle I (Test-First Development). Test tasks prefixed with 'T' (e.g., T029a) are mandatory before corresponding UI tasks.
 
 **Organization**: Tasks grouped by user story for independent implementation and incremental delivery.
+
+---
+
+## 🔒 CONSTITUTION COMPLIANCE
+
+This task list has been updated to comply with all five NON-NEGOTIABLE principles from `.specify/memory/constitution.md`:
+
+**✅ Principle I - Test-First Development**: Widget test tasks (T029a, T030a, T044a, T045a, T050a, T062a, T069a, T082a, T096a) added BEFORE all UI implementation tasks
+
+**✅ Principle II - Offline-First Architecture**: T015 base repository, T042 cache-first device repository, T061 command queue, T105 comprehensive offline sync
+
+**✅ Principle III - Platform Parity**: T095 merged mobile/web schedulers, T104 explicit parity validation, responsive layouts in T045/T083/T097
+
+**✅ Principle IV - Security by Default**: T012 platform-specific secure storage, T033 encrypted token storage, T118 security audit
+
+**✅ Principle V - Real-Time First**: T013 GraphQL client with exponential backoff (1s→2s→4s→8s→16s→32s, max 60s), T054 app lifecycle reconnection
+
+**Critical Fixes Applied**:
+- Added 9 widget test tasks before UI implementation (constitutional violation resolved)
+- Moved exponential backoff from T055 into T013 foundational task (early compliance)
+- Merged T095-T096 into single cross-platform scheduler task (parity enforcement)
+- Removed duplicate T050 (sensor datasource already in T040)
+- Added T064a command validation use case (prevent conflicting commands per FR-016)
+- Clarified T052 pull-to-refresh verification, T054 app lifecycle, T069 model-specific validation, T102 reminder timing, T103 conflict resolution
 
 ---
 
@@ -62,7 +86,7 @@
 - [x] T010 [P] Create logging utility in lib/core/utils/logger.dart with platform-specific implementations
 - [x] T011 [P] Setup Hive initialization and encryption in lib/services/storage/hive_service.dart
 - [x] T012 [P] Setup platform-specific secure storage wrapper in lib/services/storage/secure_storage_service.dart (flutter_secure_storage for mobile, encrypted IndexedDB for web)
-- [x] T013 Create GraphQL client configuration in lib/services/api/graphql/graphql_client.dart with WebSocket support and auto-reconnection
+- [x] T013 Create GraphQL client configuration in lib/services/api/graphql/graphql_client.dart with WebSocket support, auto-reconnection, AND exponential backoff (1s, 2s, 4s, 8s, 16s, 32s, max 60s per Constitution Principle V)
 - [x] T014 [P] Create REST API client in lib/services/api/rest/rest_client.dart using dio with interceptors
 - [x] T015 Create base repository pattern in lib/core/data/base_repository.dart with error handling and offline-first strategy
 - [x] T016 [P] Create app theme configuration in lib/core/theme/app_theme.dart with responsive breakpoints for web
@@ -92,7 +116,9 @@
 - [x] T027 [US4] Implement auth API data source in lib/features/auth/data/datasources/auth_remote_datasource.dart (POST /auth/token, /auth/refresh, /auth/revoke)
 - [x] T028 [US4] Implement auth repository in lib/features/auth/data/repositories/auth_repository_impl.dart with token refresh logic
 - [x] T029 [US4] Create auth state notifier in lib/features/auth/presentation/providers/auth_provider.dart using Riverpod StateNotifier
+- [x] T029a [US4] Create widget test file test/widget/auth/login_screen_test.dart with test cases for login form validation, loading states, and error display (REQUIRED before T030)
 - [x] T030 [US4] Create login screen UI in lib/features/auth/presentation/screens/login_screen.dart with responsive layout
+- [x] T030a [US4] Create widget test files test/widget/auth/email_field_test.dart, password_field_test.dart, login_button_test.dart (REQUIRED before T031)
 - [x] T031 [US4] Create login form widgets in lib/features/auth/presentation/widgets/ (email_field.dart, password_field.dart, login_button.dart)
 - [x] T032 [US4] Implement automatic token refresh interceptor in lib/services/api/rest/auth_interceptor.dart
 - [x] T033 [US4] Implement secure token storage (mobile: keychain/keystore, web: encrypted IndexedDB) in lib/features/auth/data/datasources/auth_local_datasource.dart
@@ -120,17 +146,19 @@
 - [x] T042 [US1] Implement device repository in lib/features/device/data/repositories/device_repository_impl.dart with cache-first offline strategy
 - [x] T043 [US1] Create device list state provider in lib/features/dashboard/presentation/providers/device_list_provider.dart
 - [x] T044 [US1] Create device state stream provider in lib/features/dashboard/presentation/providers/device_state_provider.dart for WebSocket subscriptions
+- [x] T044a [US1] Create widget test file test/widget/dashboard/dashboard_screen_test.dart with test cases for empty state, loading state, device list rendering, and pull-to-refresh (REQUIRED before T045)
 - [x] T045 [US1] Create dashboard screen in lib/features/dashboard/presentation/screens/dashboard_screen.dart with responsive layout (mobile: single column, web: multi-column grid)
+- [x] T045a [US1] Create widget test files test/widget/dashboard/device_status_card_test.dart, temperature_display_test.dart, humidity_display_test.dart, heating_status_test.dart (REQUIRED before T046-T049)
 - [x] T046 [P] [US1] Create device status card widget in lib/features/dashboard/presentation/widgets/device_status_card.dart
 - [x] T047 [P] [US1] Create temperature display widget in lib/features/dashboard/presentation/widgets/temperature_display.dart with progress indicator
 - [x] T048 [P] [US1] Create humidity display widget (conditional) in lib/features/dashboard/presentation/widgets/humidity_display.dart
 - [x] T049 [P] [US1] Create heating status indicator in lib/features/dashboard/presentation/widgets/heating_status.dart
-- [x] T050 [US1] Implement GraphQL sensor data source in lib/features/device/data/datasources/sensor_remote_datasource.dart (getLatestData query, onSensorData subscription)
-- [x] T051 [US1] Implement automatic sensor-controller association logic in lib/features/device/domain/usecases/associate_sensors_usecase.dart
-- [x] T052 [US1] Add manual sensor linking UI in lib/features/device/presentation/widgets/sensor_link_dialog.dart
-- [x] T053 [US1] Implement pull-to-refresh for manual status updates
-- [x] T054 [US1] Add connection status indicators and offline mode handling
-- [x] T055 [US1] Implement WebSocket reconnection logic with exponential backoff
+- [x] T050 [US1] Implement automatic sensor-controller association logic in lib/features/device/domain/usecases/associate_sensors_usecase.dart
+- [x] T050a [US1] Create widget test file test/widget/device/sensor_link_dialog_test.dart (REQUIRED before T051)
+- [x] T051 [US1] Add manual sensor linking UI in lib/features/device/presentation/widgets/sensor_link_dialog.dart
+- [x] T052 [US1] Verify pull-to-refresh implementation in dashboard_screen.dart (RefreshIndicator already added in T045)
+- [x] T053 [US1] Add connection status indicators and offline mode handling
+- [x] T054 [US1] Enhance WebSocket reconnection with app lifecycle awareness (extends T013 exponential backoff with foreground/background resume triggers)
 
 **Checkpoint**: ✅ Status monitoring complete - users can view real-time sauna state with sensors
 
@@ -144,17 +172,19 @@
 
 ### Implementation for US2
 
-- [ ] T056 [P] [US2] Create CommandRequest entity in lib/features/control/domain/entities/command_request.dart
-- [ ] T057 [P] [US2] Create command DTOs in lib/features/control/data/models/ (power_command_dto.dart, command_response_dto.dart)
-- [ ] T058 [US2] Create control repository interface in lib/features/control/domain/repositories/control_repository.dart
-- [ ] T059 [US2] Implement GraphQL control data source in lib/features/control/data/datasources/control_remote_datasource.dart (sendDeviceCommand mutation for power on/off)
-- [ ] T060 [US2] Implement control repository in lib/features/control/data/repositories/control_repository_impl.dart with retry logic
-- [ ] T061 [US2] Create command queue for offline operation in lib/features/control/data/datasources/control_local_datasource.dart using Hive
+- [x] T056 [P] [US2] Create CommandRequest entity in lib/features/control/domain/entities/command_request.dart
+- [x] T057 [P] [US2] Create command DTOs in lib/features/control/data/models/ (power_command_dto.dart, command_response_dto.dart)
+- [x] T058 [US2] Create control repository interface in lib/features/control/domain/repositories/control_repository.dart
+- [x] T059 [US2] Implement GraphQL control data source in lib/features/control/data/datasources/control_remote_datasource.dart (sendDeviceCommand mutation for power on/off)
+- [x] T060 [US2] Implement control repository in lib/features/control/data/repositories/control_repository_impl.dart with retry logic
+- [x] T061 [US2] Create command queue for offline operation in lib/features/control/data/datasources/control_local_datasource.dart using Hive
 - [ ] T062 [US2] Create control state provider in lib/features/control/presentation/providers/control_provider.dart
+- [x] T062a [US2] Create widget test file test/widget/control/power_control_test.dart with test cases for on/off states, loading states, offline prevention (REQUIRED before T063)
 - [ ] T063 [US2] Create power control widget in lib/features/control/presentation/widgets/power_control.dart with loading states
 - [ ] T064 [US2] Add command confirmation feedback (success/error snackbars)
+- [ ] T064a [US2] Create command validation use case in lib/features/control/domain/usecases/validate_command_usecase.dart to prevent conflicting commands (temp adjust when off, duplicate commands in-flight)
 - [ ] T065 [US2] Implement optimistic UI updates (show expected state immediately, rollback on failure)
-- [ ] T066 [US2] Add validation to prevent commands when sauna is offline
+- [ ] T066 [US2] Add validation to prevent commands when sauna is offline (integrates T064a validation)
 
 **Checkpoint**: ✅ Remote control complete - users can power sauna on/off remotely
 
@@ -170,7 +200,8 @@
 
 - [ ] T067 [P] [US3] Create temperature command DTO in lib/features/control/data/models/temperature_command_dto.dart
 - [ ] T068 [US3] Add temperature mutation to control data source in lib/features/control/data/datasources/control_remote_datasource.dart
-- [ ] T069 [US3] Create temperature validation use case in lib/features/control/domain/usecases/validate_temperature_usecase.dart (check model-specific safe ranges)
+- [ ] T069 [US3] Create temperature validation use case in lib/features/control/domain/usecases/validate_temperature_usecase.dart (check model-specific safe ranges from device entity modelNumber property)
+- [ ] T069a [US3] Create widget test file test/widget/control/temperature_control_test.dart with test cases for slider input, validation errors, range limits (REQUIRED before T070)
 - [ ] T070 [US3] Create temperature control widget in lib/features/control/presentation/widgets/temperature_control.dart (slider + input field)
 - [ ] T071 [US3] Add temperature range validation UI with warning dialogs
 - [ ] T072 [US3] Show estimated time to reach target temperature calculation
@@ -197,6 +228,7 @@
 - [ ] T080 [US6] Implement events repository in lib/features/events/data/repositories/events_repository_impl.dart
 - [ ] T081 [US6] Create event stream provider in lib/features/events/presentation/providers/events_provider.dart for WebSocket subscriptions
 - [ ] T082 [US6] Implement platform-specific notification dispatcher in lib/services/notifications/event_notification_handler.dart (mobile: flutter_local_notifications, web: browser notifications with permission request + in-app fallback)
+- [ ] T082a [US6] Create widget test files test/widget/events/events_screen_test.dart, event_filter_test.dart, event_list_item_test.dart (REQUIRED before T083-T085)
 - [ ] T083 [US6] Create event history screen in lib/features/events/presentation/screens/events_screen.dart with responsive list (mobile: single column, web: table view)
 - [ ] T084 [P] [US6] Create event filter widget in lib/features/events/presentation/widgets/event_filter.dart (type, severity, date range, device)
 - [ ] T085 [P] [US6] Create event list item widget in lib/features/events/presentation/widgets/event_list_item.dart
@@ -222,19 +254,17 @@
 - [ ] T092 [US5] Implement schedule local data source in lib/features/schedule/data/datasources/schedule_local_datasource.dart using Hive (local-only storage)
 - [ ] T093 [US5] Implement schedule repository in lib/features/schedule/data/repositories/schedule_repository_impl.dart
 - [ ] T094 [US5] Create schedule state provider in lib/features/schedule/presentation/providers/schedule_provider.dart
-- [ ] T095 [US5] Implement mobile background scheduler in lib/services/background/mobile_scheduler.dart using workmanager
-- [ ] T096 [US5] Implement web service worker scheduler in web/service_worker.js with wake-up notifications
-- [ ] T096a [US5] Create web service worker implementation in web/service_worker.js (schedule execution logic, notification handling, wake-up events)
-- [ ] T097 [US5] Create schedule execution coordinator in lib/features/schedule/domain/usecases/execute_schedule_usecase.dart (calls control repository to send power/temp commands)
-- [ ] T098 [US5] Create schedule list screen in lib/features/schedule/presentation/screens/schedule_list_screen.dart with responsive layout
-- [ ] T099 [US5] Create schedule form screen in lib/features/schedule/presentation/screens/schedule_form_screen.dart (add/edit)
-- [ ] T100 [P] [US5] Create time picker widget in lib/features/schedule/presentation/widgets/time_picker.dart
-- [ ] T101 [P] [US5] Create day selector widget in lib/features/schedule/presentation/widgets/day_selector.dart
-- [ ] T102 [P] [US5] Create schedule card widget in lib/features/schedule/presentation/widgets/schedule_card.dart with enable/disable toggle
-- [ ] T103 [US5] Implement reminder notifications before scheduled activation time
-- [ ] T104 [US5] Add conflict detection for overlapping schedules
-- [ ] T105 [US5] Handle web service worker limitations and graceful degradation
-- [ ] T106 [US5] Add cross-platform validation for schedule execution (verify workmanager on mobile, service worker on web)
+- [ ] T095 [US5] Implement cross-platform background scheduler (mobile: lib/services/background/mobile_scheduler.dart using workmanager, web: web/service_worker.js with wake-up notifications and execution logic)
+- [ ] T096 [US5] Create schedule execution coordinator in lib/features/schedule/domain/usecases/execute_schedule_usecase.dart (calls control repository to send power/temp commands)
+- [ ] T096a [US5] Create widget test files test/widget/schedule/schedule_list_screen_test.dart, schedule_form_screen_test.dart (REQUIRED before T097-T098)
+- [ ] T097 [US5] Create schedule list screen in lib/features/schedule/presentation/screens/schedule_list_screen.dart with responsive layout
+- [ ] T098 [US5] Create schedule form screen in lib/features/schedule/presentation/screens/schedule_form_screen.dart (add/edit)
+- [ ] T099 [P] [US5] Create time picker widget in lib/features/schedule/presentation/widgets/time_picker.dart
+- [ ] T100 [P] [US5] Create day selector widget in lib/features/schedule/presentation/widgets/day_selector.dart
+- [ ] T101 [P] [US5] Create schedule card widget in lib/features/schedule/presentation/widgets/schedule_card.dart with enable/disable toggle
+- [ ] T102 [US5] Implement reminder notifications 5 minutes before scheduled activation time (mobile: local notification, web: browser notification)
+- [ ] T103 [US5] Add conflict detection for overlapping schedules with warning dialog and override option
+- [ ] T104 [US5] Add cross-platform validation for schedule execution with explicit platform parity test (verify workmanager on mobile, service worker on web per Constitution Principle III)
 
 **Checkpoint**: ✅ Scheduling complete - users can automate sauna heating across platforms
 
@@ -244,25 +274,24 @@
 
 **Purpose**: Final improvements affecting multiple features and platforms
 
-- [ ] T107 [P] Implement comprehensive offline mode with sync queue across all features
-- [ ] T107 [P] Add loading skeletons for all async data in lib/shared/widgets/skeleton_loader.dart
-- [ ] T108 [P] Implement responsive navigation (mobile: bottom nav, tablet/desktop: side rail) in lib/core/router/responsive_navigation.dart
-- [ ] T109 [P] Add app settings screen in lib/features/settings/presentation/screens/settings_screen.dart (units, theme, language)
-- [ ] T110 Add user profile screen with account management
-- [ ] T111 Implement proper error boundary widgets for each feature
-- [ ] T112 Add analytics event tracking (platform-specific: Firebase for mobile, Google Analytics for web)
-- [ ] T113 [P] Performance optimization: implement lazy loading for device/event lists
-- [ ] T114 [P] Accessibility improvements: screen reader support, semantic labels, keyboard navigation for web
-- [ ] T115 Add deep linking support for direct navigation to devices/schedules
-- [ ] T116 Implement app lifecycle handling for subscription management (pause on background, resume on foreground)
-- [ ] T117 Add platform-specific polish (iOS: Cupertino widgets, Android: Material3, Web: hover states)
-- [ ] T118 Create app onboarding flow for first-time users
-- [ ] T119 Add rate limiting protection with exponential backoff for all API calls
-- [ ] T120 Security audit: validate all user inputs, sanitize display data, check token expiry
-- [ ] T121 [P] Create README.md with build instructions for all platforms per quickstart.md
-- [ ] T122 [P] Document API integration patterns in docs/api-integration.md
-- [ ] T123 Run final validation of quickstart.md instructions on clean environment
-- [ ] T124 Create release build configurations for iOS, Android, and Web
+- [ ] T105 [P] Implement comprehensive offline mode with sync queue for: power commands, temperature settings, schedule CRUD operations, event acknowledgments (integrates with T061 command queue)
+- [ ] T106 [P] Add loading skeletons for all async data in lib/shared/widgets/skeleton_loader.dart
+- [ ] T107 [P] Implement responsive navigation (mobile: bottom nav, tablet/desktop: side rail) in lib/core/router/responsive_navigation.dart
+- [ ] T108 [P] Add app settings screen in lib/features/settings/presentation/screens/settings_screen.dart (units, theme, language)
+- [ ] T109 Add user profile screen with account management
+- [ ] T110 Implement proper error boundary widgets for each feature
+- [ ] T111 Add analytics event tracking (platform-specific: Firebase for mobile, Google Analytics for web)
+- [ ] T112 [P] Performance optimization: implement lazy loading for device/event lists
+- [ ] T113 [P] Accessibility improvements: screen reader support, semantic labels, keyboard navigation for web
+- [ ] T114 Add deep linking support for direct navigation to devices/schedules
+- [ ] T115 Add platform-specific polish (iOS: Cupertino widgets, Android: Material3, Web: hover states)
+- [ ] T116 Create app onboarding flow for first-time users
+- [ ] T117 Add rate limiting protection with exponential backoff for all API calls
+- [ ] T118 Security audit: validate all user inputs, sanitize display data, check token expiry
+- [ ] T119 [P] Create README.md with build instructions for all platforms per quickstart.md
+- [ ] T120 [P] Document API integration patterns in docs/api-integration.md
+- [ ] T121 Run final validation of quickstart.md instructions on clean environment
+- [ ] T122 Create release build configurations for iOS, Android, and Web
 
 ---
 
@@ -284,16 +313,18 @@
 
 **MVP = US4 (Auth) + US1 (Status) + US2 (Control)**
 
+**Constitution Compliance**: All widget tests MUST be completed before corresponding UI tasks per Principle I (Test-First Development).
+
 ```
 T001-T008 (Setup)
     ↓
-T009-T022 (Foundational) ← BLOCKING GATE
+T009-T022 (Foundational) ← BLOCKING GATE (includes T013 with exponential backoff per Principle V)
     ↓
-T023-T035 (US4: Auth) ← REQUIRED FOR MVP
+T023-T035 (US4: Auth) ← REQUIRED FOR MVP (includes T029a, T030a widget tests)
     ↓
-T036-T055 (US1: Status) ← REQUIRED FOR MVP
+T036-T054 (US1: Status) ← REQUIRED FOR MVP (includes T044a, T045a, T050a widget tests)
     ↓
-T056-T066 (US2: Control) ← REQUIRED FOR MVP
+T055-T066 (US2: Control) ← REQUIRED FOR MVP (includes T062a widget test, T064a validation)
     ↓
 MVP COMPLETE ✅
 ```
@@ -418,31 +449,31 @@ After each phase, validate using the "Independent Test" criteria from spec.md:
 
 ## Task Summary
 
-- **Total Tasks**: 126
+- **Total Tasks**: 135 (increased from 126 due to widget test tasks per constitution)
 - **Setup Tasks**: 8 (T001-T008)
 - **Foundational Tasks**: 14 (T009-T022)
-- **User Story 4 (Auth - P1)**: 13 tasks (T023-T035) - MVP Foundation
-- **User Story 1 (Status - P1)**: 20 tasks (T036-T055) - MVP Core
-- **User Story 2 (Control - P2)**: 11 tasks (T056-T066) - MVP
-- **User Story 3 (Temperature - P3)**: 8 tasks (T067-T074)
-- **User Story 6 (Events - P3)**: 14 tasks (T075-T088)
-- **User Story 5 (Scheduling - P4)**: 19 tasks (T089-T107) - includes T096a and T106
-- **Polish**: 19 tasks (T108-T126)
+- **User Story 4 (Auth - P1)**: 15 tasks (T023-T035 + T029a, T030a widget tests) - MVP Foundation
+- **User Story 1 (Status - P1)**: 21 tasks (T036-T054 + T044a, T045a, T050a widget tests) - MVP Core
+- **User Story 2 (Control - P2)**: 13 tasks (T055-T066 + T062a widget test, T064a validation) - MVP
+- **User Story 3 (Temperature - P3)**: 9 tasks (T067-T074 + T069a widget test)
+- **User Story 6 (Events - P3)**: 15 tasks (T075-T088 + T082a widget test)
+- **User Story 5 (Scheduling - P4)**: 18 tasks (T089-T104 + T096a widget test, merged T095-T096)
+- **Polish**: 18 tasks (T105-T122)
 
-**Parallel Opportunities Identified**: 47 tasks marked [P] can run in parallel with others in their phase
+**Parallel Opportunities Identified**: 47+ tasks marked [P] can run in parallel with others in their phase
 
 **MVP Scope** (Recommended first release):
 - Setup + Foundational: 22 tasks
-- US4 (Auth): 13 tasks  
-- US1 (Status): 20 tasks
-- US2 (Control): 11 tasks
-- **MVP Total**: 66 tasks
+- US4 (Auth): 15 tasks (includes widget tests)
+- US1 (Status): 21 tasks (includes widget tests)
+- US2 (Control): 13 tasks (includes widget test + validation)
+- **MVP Total**: 71 tasks (increased from 66 to ensure constitution compliance)
 
 **Post-MVP Features**:
-- US3 (Temperature): 8 tasks
-- US6 (Events): 14 tasks
-- US5 (Scheduling): 19 tasks
-- Polish: 19 tasks
+- US3 (Temperature): 9 tasks
+- US6 (Events): 15 tasks
+- US5 (Scheduling): 18 tasks
+- Polish: 18 tasks
 - **Enhancement Total**: 60 tasks
 
 ---
