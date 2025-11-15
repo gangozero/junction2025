@@ -18,6 +18,7 @@ import '../../domain/entities/user_account.dart';
 /// Provides secure storage for session tokens and user account data.
 class AuthLocalDataSource {
   // Storage keys
+  static const String _keyIdToken = 'auth_id_token';
   static const String _keyAccessToken = 'auth_access_token';
   static const String _keyRefreshToken = 'auth_refresh_token';
   static const String _keyTokenType = 'auth_token_type';
@@ -40,6 +41,7 @@ class AuthLocalDataSource {
       AppLogger.cache('save', 'api_session', hit: null);
 
       await Future.wait<void>([
+        SecureStorageService.save(_keyIdToken, session.idToken),
         SecureStorageService.save(_keyAccessToken, session.accessToken),
         SecureStorageService.save(_keyRefreshToken, session.refreshToken),
         SecureStorageService.save(_keyTokenType, session.tokenType),
@@ -71,19 +73,21 @@ class AuthLocalDataSource {
     try {
       AppLogger.cache('read', 'api_session', hit: null);
 
-      final accessToken = await SecureStorageService.get(_keyAccessToken);
-      if (accessToken == null) {
+      final idToken = await SecureStorageService.get(_keyIdToken);
+      if (idToken == null) {
         AppLogger.cache('read', 'api_session', hit: false);
         return null;
       }
 
+      final accessToken = await SecureStorageService.get(_keyAccessToken);
       final refreshToken = await SecureStorageService.get(_keyRefreshToken);
       final tokenType = await SecureStorageService.get(_keyTokenType);
       final expiresAtStr = await SecureStorageService.get(_keyExpiresAt);
       final createdAtStr = await SecureStorageService.get(_keyCreatedAt);
       final userId = await SecureStorageService.get(_keyUserId);
 
-      if (refreshToken == null ||
+      if (accessToken == null ||
+          refreshToken == null ||
           expiresAtStr == null ||
           createdAtStr == null ||
           userId == null) {
@@ -93,6 +97,7 @@ class AuthLocalDataSource {
       }
 
       final session = APISession(
+        idToken: idToken,
         accessToken: accessToken,
         refreshToken: refreshToken,
         tokenType: tokenType ?? 'Bearer',
@@ -187,6 +192,7 @@ class AuthLocalDataSource {
       AppLogger.auth('Clearing session data');
 
       await Future.wait<void>([
+        SecureStorageService.delete(_keyIdToken),
         SecureStorageService.delete(_keyAccessToken),
         SecureStorageService.delete(_keyRefreshToken),
         SecureStorageService.delete(_keyTokenType),

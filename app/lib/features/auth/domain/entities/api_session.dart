@@ -10,19 +10,22 @@ import 'package:equatable/equatable.dart';
 
 /// API session entity
 ///
-/// Manages authentication state including access token,
-/// refresh token, and session expiration.
+/// Manages authentication state including ID token (for API auth),
+/// access token (for Cognito), refresh token, and session expiration.
 class APISession extends Equatable {
-  /// Access token for API requests
+  /// ID token for API authorization (used in Bearer header)
+  final String idToken;
+
+  /// Access token for Cognito user pool operations
   final String accessToken;
 
-  /// Refresh token for obtaining new access tokens
+  /// Refresh token for obtaining new tokens
   final String refreshToken;
 
-  /// Token type (usually "Bearer")
+  /// Token type (always "Bearer")
   final String tokenType;
 
-  /// Access token expiration timestamp
+  /// Token expiration timestamp
   final DateTime expiresAt;
 
   /// Session creation timestamp
@@ -32,6 +35,7 @@ class APISession extends Equatable {
   final String userId;
 
   const APISession({
+    required this.idToken,
     required this.accessToken,
     required this.refreshToken,
     required this.tokenType,
@@ -42,7 +46,8 @@ class APISession extends Equatable {
 
   /// Create empty session (unauthenticated state)
   APISession.empty()
-    : accessToken = '',
+    : idToken = '',
+      accessToken = '',
       refreshToken = '',
       tokenType = 'Bearer',
       expiresAt = DateTime.fromMillisecondsSinceEpoch(0),
@@ -50,7 +55,7 @@ class APISession extends Equatable {
       userId = '';
 
   /// Check if session is empty (no active session)
-  bool get isEmpty => accessToken.isEmpty && refreshToken.isEmpty;
+  bool get isEmpty => idToken.isEmpty && refreshToken.isEmpty;
 
   /// Check if session is valid (has tokens)
   bool get isNotEmpty => !isEmpty;
@@ -79,6 +84,7 @@ class APISession extends Equatable {
 
   /// Create copy with updated fields
   APISession copyWith({
+    String? idToken,
     String? accessToken,
     String? refreshToken,
     String? tokenType,
@@ -87,6 +93,7 @@ class APISession extends Equatable {
     String? userId,
   }) {
     return APISession(
+      idToken: idToken ?? this.idToken,
       accessToken: accessToken ?? this.accessToken,
       refreshToken: refreshToken ?? this.refreshToken,
       tokenType: tokenType ?? this.tokenType,
@@ -98,6 +105,7 @@ class APISession extends Equatable {
 
   @override
   List<Object?> get props => [
+    idToken,
     accessToken,
     refreshToken,
     tokenType,

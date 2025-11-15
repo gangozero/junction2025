@@ -10,16 +10,24 @@ import '../models/event_dto.dart';
 /// Implements ring buffer cache for events (max 1000 events)
 class EventsLocalDataSource {
   static const String _boxName = 'events_cache';
+  static const String _ackBoxName = 'pending_acknowledgments';
   static const int _maxEvents = 1000;
 
   Box<Map<dynamic, dynamic>>? _box;
+  Box<String>? _ackBox;
 
-  /// Initialize Hive box
+  /// Initialize Hive boxes
   Future<void> init() async {
     if (!Hive.isBoxOpen(_boxName)) {
       _box = await Hive.openBox<Map<dynamic, dynamic>>(_boxName);
     } else {
       _box = Hive.box<Map<dynamic, dynamic>>(_boxName);
+    }
+
+    if (!Hive.isBoxOpen(_ackBoxName)) {
+      _ackBox = await Hive.openBox<String>(_ackBoxName);
+    } else {
+      _ackBox = Hive.box<String>(_ackBoxName);
     }
   }
 
@@ -106,5 +114,29 @@ class EventsLocalDataSource {
         .map((json) => EventDTO.fromJson(Map<String, dynamic>.from(json)))
         .where((e) => e.deviceId == deviceId)
         .length;
+  }
+
+  /// Add event acknowledgment to pending queue (for offline sync)
+  Future<void> addPendingAcknowledgment(String eventId) async {
+    await init();
+    await _ackBox!.put(eventId, eventId);
+  }
+
+  /// Get pending acknowledgments
+  Future<List<String>> getPendingAcknowledgments() async {
+    await init();
+    return _ackBox!.values.toList();
+  }
+
+  /// Remove acknowledgment from pending queue (after successful sync)
+  Future<void> removePendingAcknowledgment(String eventId) async {
+    await init();
+    await _ackBox!.delete(eventId);
+  }
+
+  /// Clear all pending acknowledgments
+  Future<void> clearPendingAcknowledgments() async {
+    await init();
+    await _ackBox!.clear();
   }
 }

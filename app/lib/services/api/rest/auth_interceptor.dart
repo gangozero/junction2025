@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/logger.dart';
+import '../../../core/utils/security.dart';
 import '../../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../../features/auth/data/models/refresh_request.dart';
@@ -40,6 +41,21 @@ class AuthInterceptor extends Interceptor {
         return handler.next(options);
       }
 
+      // Validate token format before using
+      if (!TokenSecurity.isValidJwtFormat(session.idToken)) {
+        AppLogger.e('Invalid token format detected');
+        return handler.reject(
+          DioException(
+            requestOptions: options,
+            response: Response(
+              requestOptions: options,
+              statusCode: 401,
+              data: {'message': 'Invalid token format'},
+            ),
+          ),
+        );
+      }
+
       // Check if token is expiring soon
       if (session.isExpiringSoon && !session.isExpired) {
         AppLogger.i('Token expiring soon - triggering refresh');
@@ -48,7 +64,7 @@ class AuthInterceptor extends Interceptor {
         final updatedSession = await _localDataSource.getSession();
         if (updatedSession != null) {
           options.headers['Authorization'] = ApiConstants.getAuthHeader(
-            updatedSession.accessToken,
+            updatedSession.idToken,
           );
         }
       } else if (session.isExpired) {
@@ -58,7 +74,7 @@ class AuthInterceptor extends Interceptor {
         final updatedSession = await _localDataSource.getSession();
         if (updatedSession != null) {
           options.headers['Authorization'] = ApiConstants.getAuthHeader(
-            updatedSession.accessToken,
+            updatedSession.idToken,
           );
         } else {
           AppLogger.e('Token refresh failed - no session after refresh');
@@ -76,7 +92,7 @@ class AuthInterceptor extends Interceptor {
       } else {
         // Token is valid - add to headers
         options.headers['Authorization'] = ApiConstants.getAuthHeader(
-          session.accessToken,
+          session.idToken,
         );
       }
     } catch (e) {

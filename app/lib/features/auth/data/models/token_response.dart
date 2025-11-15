@@ -5,6 +5,8 @@ library;
 ///
 /// DTO for receiving authentication tokens from the API.
 
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/api_session.dart';
@@ -13,82 +15,105 @@ import '../../domain/entities/user_account.dart';
 /// Token response DTO
 ///
 /// Contains authentication tokens and user information
-/// returned from the authentication API.
+/// returned from the authentication API (AWS Cognito).
 class TokenResponse extends Equatable {
-  /// Access token for API requests
+  /// ID token for API authorization (use this in Bearer header)
+  final String idToken;
+
+  /// Access token for Cognito user pool operations
   final String accessToken;
 
-  /// Refresh token for obtaining new access tokens
+  /// Refresh token for obtaining new tokens
   final String refreshToken;
-
-  /// Token type (usually "Bearer")
-  final String tokenType;
 
   /// Token expiration time in seconds
   final int expiresIn;
 
-  /// User information
-  final UserData user;
-
   const TokenResponse({
+    required this.idToken,
     required this.accessToken,
     required this.refreshToken,
-    required this.tokenType,
     required this.expiresIn,
-    required this.user,
   });
 
-  /// Create from JSON response
+  /// Create from JSON response (Cognito format)
   factory TokenResponse.fromJson(Map<String, dynamic> json) {
     return TokenResponse(
-      accessToken: json['access_token'] as String,
-      refreshToken: json['refresh_token'] as String,
-      tokenType: json['token_type'] as String? ?? 'Bearer',
-      expiresIn: json['expires_in'] as int,
-      user: UserData.fromJson(json['user'] as Map<String, dynamic>),
+      idToken: json['idToken'] as String,
+      accessToken: json['accessToken'] as String,
+      refreshToken: json['refreshToken'] as String,
+      expiresIn: json['expiresIn'] as int,
     );
   }
 
-  /// Convert to JSON
+  /// Convert to JSON (Cognito format)
   Map<String, dynamic> toJson() {
     return {
-      'access_token': accessToken,
-      'refresh_token': refreshToken,
-      'token_type': tokenType,
-      'expires_in': expiresIn,
-      'user': user.toJson(),
+      'idToken': idToken,
+      'accessToken': accessToken,
+      'refreshToken': refreshToken,
+      'expiresIn': expiresIn,
     };
+  }
+
+  /// Decode user ID from ID token
+  ///
+  /// The ID token is a JWT that contains user claims.
+  /// We extract the 'sub' (subject) claim which is the user ID.
+  String _extractUserIdFromToken() {
+    try {
+      // JWT structure: header.payload.signature
+      final parts = idToken.split('.');
+      if (parts.length != 3) {
+        throw FormatException('Invalid JWT format');
+      }
+
+      // Decode payload (base64url)
+      final payload = parts[1];
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      final json = jsonDecode(decoded) as Map<String, dynamic>;
+
+      return json['sub'] as String;
+    } catch (e) {
+      // Fallback to empty string if decoding fails
+      return '';
+    }
   }
 
   /// Convert to domain entities
   ///
   /// Returns a tuple of (APISession, UserAccount) domain entities.
+  /// Note: User account details need to be fetched separately via GraphQL.
   (APISession, UserAccount) toDomainEntities() {
     final now = DateTime.now();
     final expiresAt = now.add(Duration(seconds: expiresIn));
+    final userId = _extractUserIdFromToken();
 
     final session = APISession(
+      idToken: idToken,
       accessToken: accessToken,
       refreshToken: refreshToken,
-      tokenType: tokenType,
+      tokenType: 'Bearer',
       expiresAt: expiresAt,
       createdAt: now,
-      userId: user.id,
+      userId: userId,
     );
 
-    final account = user.toDomain();
+    // Create a temporary user account with minimal info
+    // The full user profile should be fetched via GraphQL after login
+    final account = UserAccount(
+      userId: userId,
+      email: '', // Will be populated from GraphQL query
+      createdAt: now,
+      lastLoginAt: now,
+    );
 
     return (session, account);
   }
 
   @override
-  List<Object?> get props => [
-    accessToken,
-    refreshToken,
-    tokenType,
-    expiresIn,
-    user,
-  ];
+  List<Object?> get props => [idToken, accessToken, refreshToken, expiresIn];
 }
 
 /// User data DTO
