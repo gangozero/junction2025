@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/layout_constants.dart';
 import '../../../map/presentation/screens/map_screen.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/device_list_provider.dart';
 import '../widgets/device_status_card.dart';
 
@@ -49,6 +50,11 @@ class DashboardScreen extends ConsumerWidget {
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(deviceListProvider),
             tooltip: 'Refresh',
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _handleLogout(context, ref),
+            tooltip: 'Logout',
           ),
         ],
       ),
@@ -145,5 +151,29 @@ class DashboardScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Log Out'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Log Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(authProvider.notifier).logout();
+    }
   }
 }
